@@ -11,6 +11,8 @@ LVM stands for Logical Volume Manager and has great features such as:
 
 ## Overprovisioning
 
+## LXC and LVM
+
 
 
 
