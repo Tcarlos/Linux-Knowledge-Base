@@ -12,7 +12,7 @@ Diagram of Example 1, a situation of my work in November 2015:
                                                               +----------------------------------------------------------+
                                                               | [2GB] LXC_CLIENT1LV ||  [2GB] LXC_CLIENT2LV              |
                                                               +----------------------------------------------------------+
-                                                              |            [7.5GB] THINPOOL "LXC"                        |
+                                                              |            [7.5GB] LOGICAL VOLUME THINPOOL "LXC"         |
                                                               +----------------------------------------------------------+
                                                               +----------------------------------------------------------+
                                                               | [0.008GB] thinmeta ||[7.5GB] thindata                    |
@@ -175,6 +175,20 @@ Here are some outputs:
   - LXC thinpool
 
 ## Snapshots
+
+Check for available space on the volume group(s).
+
+In example 1A we see that volume group named VG1 has a total size of 24.97GB, of which 6.12GB is free.
+When we list the logical volumes we see that there are 5 logical volumes in volume group named VG1.
+When we add up the space each logical volume in VG1 has, we indeed get to the 24.79GB
+
+Now we will create a snapshot of 1GB
+
+root@livenode5:/home/office# lvcreate -L 1GB -s -n rootlv_snap /dev/VG1/rootlv
+  Found duplicate PV WtHbpf8uHdCyhlTY8E9s9LMdqZmHWKU0: using /dev/VG1/cachedlv not /dev/mapper/VG1-cachedlv_corig
+  Logical volume "rootlv_snap" created
+
+**CHALLENGE:** create a snapshot of LXC containers, one way or another.
 
 ## Thin Provisoning
 
