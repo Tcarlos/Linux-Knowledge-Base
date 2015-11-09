@@ -1,12 +1,11 @@
+# LVM
+
 LVM stands for Logical Volume Manager and has great features such as:
 
--Thin Provisioning
--Snapshots
+  - Thin Provisioning
+  - Snapshots
 
-
-## Snapshots
-
-
+## Example Situation used in this article
 
 Diagram of Example 1, a situation of my work in November 2015:
 
@@ -162,9 +161,20 @@ Here are some outputs:
     lxc_client2 lxc  Vwi-aotz--   2.00g lxc                        24.80
 
 
+## Creating the partitioning scheme
 
+### Install Ubuntu Server with LVM
 
+### Install LXC
 
+### Set up physical volumes, volume groups, logical volumes
+
+### Set up a thinpool
+
+  - Regular thinppool
+  - LXC thinpool
+
+## Snapshots
 
 ## Thin Provisoning
 
