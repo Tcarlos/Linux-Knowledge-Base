@@ -184,9 +184,34 @@ When we add up the space each logical volume in VG1 has, we indeed get to the 24
 
 Now we will create a snapshot of 1GB
 
+Syntax:
+
+root@livenode5:/home/office# lvcreate -L 1GB -s -n [SNAPSHOT_NAME] [LV_PATH]
+
 root@livenode5:/home/office# lvcreate -L 1GB -s -n rootlv_snap /dev/VG1/rootlv
+
+    Found duplicate PV WtHbpf8uHdCyhlTY8E9s9LMdqZmHWKU0: using /dev/VG1/cachedlv not /dev/mapper/VG1-cachedlv_corig
+    Logical volume "rootlv_snap" created
+
+### Extend Snapshot size
+sometimes the snapshot size is too small in order to back up the LV data in ued. In that case you have to extend the snapshotlv to match
+
+root@livenode5:/tmp# lvextend -L +1G /dev/VG1/rootlv_snap
   Found duplicate PV WtHbpf8uHdCyhlTY8E9s9LMdqZmHWKU0: using /dev/VG1/cachedlv not /dev/mapper/VG1-cachedlv_corig
-  Logical volume "rootlv_snap" created
+  Reached maximum COW size 2.80 GiB (718 extents).
+  Size of logical volume VG1/rootlv_snap changed from 2.00 GiB (512 extents) to 2.80 GiB (718 extents).
+  Logical volume rootlv_snap successfully resized
+
+I made a 2GB snapshot of 3GB LV ROOTLV, which had 1.8 GB in use. Then I downloaded a 200mb file to /tmp, and to be sure i have extended the lv snapshot to 2.8
+
+Next is restoring or merging the snapshot, and for that we have to unmount the ROOTLV first. Unfortunately we cant unmount a LV mounted as / .... so i have to do this again with another LV...
+
+
+
+
+
+
+
 
 **CHALLENGE:** create a snapshot of LXC containers, one way or another.
 
