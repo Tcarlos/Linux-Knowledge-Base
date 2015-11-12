@@ -5,7 +5,7 @@ LVM stands for Logical Volume Manager and has great features such as:
   - Thin Provisioning
   - Snapshots
 
-## Example Situation used in this article
+## 1.2 Example Situation used in this article
 
 Diagram of Example 1, a situation of my work in November 2015:
 
@@ -161,20 +161,18 @@ Here are some outputs:
     lxc_client2 lxc  Vwi-aotz--   2.00g lxc                        24.80
 
 
-## Creating the partitioning scheme
+### 1.3 Install Ubuntu Server with LVM
 
-### Install Ubuntu Server with LVM
+### 1.4 Install LXC
 
-### Install LXC
+### 1.5 Set up more physical volumes, volume groups, logical volumes
 
-### Set up physical volumes, volume groups, logical volumes
-
-### Set up a thinpool
+### 1.6 Set up a thinpool
 
   - Regular thinppool
   - LXC thinpool
 
-## Snapshots
+### 1.7 Snapshots
 
 Check for available space on the volume group(s).
 
@@ -194,19 +192,61 @@ root@livenode5:/home/office# lvcreate -L 1GB -s -n rootlv_snap /dev/VG1/rootlv
     Logical volume "rootlv_snap" created
 
 ### Extend Snapshot size
-sometimes the snapshot size is too small in order to back up the LV data in ued. In that case you have to extend the snapshotlv to match
 
-root@livenode5:/tmp# lvextend -L +1G /dev/VG1/rootlv_snap
-  Found duplicate PV WtHbpf8uHdCyhlTY8E9s9LMdqZmHWKU0: using /dev/VG1/cachedlv not /dev/mapper/VG1-cachedlv_corig
-  Reached maximum COW size 2.80 GiB (718 extents).
-  Size of logical volume VG1/rootlv_snap changed from 2.00 GiB (512 extents) to 2.80 GiB (718 extents).
-  Logical volume rootlv_snap successfully resized
+###Autoextending snapshots
+
+sometimes the snapshot size is too small in order to back up the LV data in use. In that case you have to extend the snapshotlv to match
+
+**Example:**
+
+**root@livenode5:/tmp# lvextend -L +1G /dev/VG1/rootlv_snap**
+
+    Found duplicate PV WtHbpf8uHdCyhlTY8E9s9LMdqZmHWKU0: using /dev/VG1/cachedlv not /dev/mapper/VG1-cachedlv_corig
+    Reached maximum COW size 2.80 GiB (718 extents).
+    Size of logical volume VG1/rootlv_snap changed from 2.00 GiB (512 extents) to 2.80 GiB (718 extents).
+    Logical volume rootlv_snap successfully resized
 
 I made a 2GB snapshot of 3GB LV ROOTLV, which had 1.8 GB in use. Then I downloaded a 200mb file to /tmp, and to be sure i have extended the lv snapshot to 2.8
 
 Next is restoring or merging the snapshot, and for that we have to unmount the ROOTLV first. Unfortunately we cant unmount a LV mounted as / .... so i have to do this again with another LV...
 
+Update
 
+Now making a file in /boot, then make a snapshot of bootlv, extend it, delete the file, then restore and see the file get back again
+
+
+root@livenode5:/boot# lvcreate -L 2GB -s -n bootlv_snap /dev/VG1/bootlv
+  Found duplicate PV WtHbpf8uHdCyhlTY8E9s9LMdqZmHWKU0: using /dev/VG1/cachedlv not /dev/mapper/VG1-cachedlv_corig
+  Reducing COW size 2.00 GiB down to maximum usable size 956.00 MiB.
+  Logical volume "bootlv_snap" created
+
+The maximum size of a snapshot is the total size of the LV that will get a snapshot from.
+
+Cant make a snapshot of a LV that's mounted as /boot
+
+root@livenode5:/boot# lvcreate -L 2GB -s -n lxc_client2_snap /dev/lxc/lxc_client2
+  Found duplicate PV WtHbpf8uHdCyhlTY8E9s9LMdqZmHWKU0: using /dev/VG1/cachedlv not /dev/mapper/VG1-cachedlv_corig
+  Logical volume "lxc_client2_snap" created
+root@livenode5:/boot# lvs
+  Found duplicate PV WtHbpf8uHdCyhlTY8E9s9LMdqZmHWKU0: using /dev/VG1/cachedlv not /dev/mapper/VG1-cachedlv_corig
+  LV               VG   Attr       LSize   Pool      Origin           Data%  Meta%  Move Log Cpy%Sync Convert
+  bootlv           VG1  owi-aos--- 952.00m                                            
+  bootlv_snap      VG1  swi-a-s--- 956.00m           bootlv           0.01            
+  cachedata        VG1  Cwi---C---   4.00g                                            
+  cachedlv         VG1  Cwi-aoC---  10.00g cachedata [cachedlv_corig]                 
+  rootlv           VG1  -wi-ao----   2.79g                                            
+  swaplv           VG1  -wi-ao---- 952.00m                                            
+  lxc              lxc  twi-a-tz--   7.48g                            6.64   3.47     
+  lxc_client2      lxc  owi-aotz--   2.00g lxc                        24.84           
+  lxc_client2_snap lxc  swi-a-s---   2.00g           lxc_client2      0.00 
+
+
+Leartn making snapshots. no /root /boot
+And somehow I do not see file recovery when using the snapshot. Possibly coz I dont understand it fully, or because you also cant restore lxc lvm snapshot
+
+Here's a new link:
+
+http://askubuntu.com/questions/424225/setting-up-lvm-snapshot-as-a-backup-restore-point-in-ubuntu
 
 
 
