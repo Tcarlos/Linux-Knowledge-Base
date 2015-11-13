@@ -16,7 +16,19 @@ lvcreate -n data -L 1GB /dev/VG1
 
 ### Create LXC container in a thinpool
 
-### Create and restore snapshot
+### Create a snapshot
+
+### Restore a snapsho
+
+### Extend a snapshot
+
+### Reduce a snapshot
+
+### Autoextend snapshots
+
+### Use a snapshot script to make backups automatically
+
+### TESTCASE: a solid test about create and restore snapshot
 
 Create an LV and confirm creation
 
@@ -67,19 +79,5 @@ Confirm data LV has been restored to the situation that has only 3 files
 
     mount /dev/VG1/data /data
     ls -la /data
-
-
-
-
-
-### Restore an LV from a snapshot
-
-### Extend a snapshot
-
-### Reduce a snapshot
-
-### Autoextend snapshots
-
-### Use a snapshot script to make backups automatically
 
 ### LVM and DRBD combined
