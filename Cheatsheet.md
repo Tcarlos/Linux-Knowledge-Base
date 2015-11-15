@@ -43,6 +43,7 @@ Add these lines to /var/lib/lxc/office1/config:
 
 ### 2.3 Create LXC container
 
+    sudo su
     lxc-create -t download -n office1
     lxc-start -n office1
     lxc-stop -n office1
