@@ -1,4 +1,4 @@
-## 1. Install Ubuntu Server with RAID and LVM
+## 1. Ubuntu Server installation with LVM (and RAID)
 
 ## 2. LXC
 
