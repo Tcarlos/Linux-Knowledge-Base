@@ -130,11 +130,15 @@ Now make a cachepool on the SSD raid:
 
     lvconvert --merge /dev/VG1/data2_snap
 
-Confirm data LV has been restored
+Confirm data LV has been restored, one way is to mount and list
 
     mount /dev/VG1/data /data
     ls -la /data
+    
+Another way is checking diskspace
 
+    df -Th
+    
 ### 8.3 Extend a snapshot
 
     lvextend -L +1G /dev/VG1/rootlv_snap
