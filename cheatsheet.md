@@ -122,9 +122,22 @@ Now make a cachepool on the SSD raid:
 
 ### 8.1 Create a snapshot
 
-### 8.2 Restore with a snapshot
+    lvcreate -L 1GB -s -n [SNAPSHOT_NAME] [LV_PATH]
+
+    lvcreate -L 1GB -s -n rootlv_snap /dev/VG1/rootlv
+
+### 8.2 Restore LV with a snapshot
+
+    lvconvert --merge /dev/VG1/data2_snap
+
+Confirm data LV has been restored
+
+    mount /dev/VG1/data /data
+    ls -la /data
 
 ### 8.3 Extend a snapshot
+
+    lvextend -L +1G /dev/VG1/rootlv_snap
 
 ### 8.4 Reduce a snapshot
 
