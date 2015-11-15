@@ -1,3 +1,12 @@
+# Table of Contents
+
+## 1. Ubuntu Server installation with LVM (and RAID)
+## 2. LXC
+## 3. Physical Volumes, Volume Groups and Logical Volumes
+## 4. Cachepools
+## 5. LVM Snapshots
+## 6. DBRD
+
 ## 1. Ubuntu Server installation with LVM (and RAID)
 
 ## 2. LXC
@@ -96,11 +105,11 @@ Add another PV to an existing Volume Group
 
     lvcreate -n data -L 1GB /dev/VG1
     
-## 6. Thinpools
+## 4. Thinpools
 
-### 6.1 Create a basic thinpools
+### 4.1 Create a basic thinpools
 
-### 6.2 Create LXC containers in a thinpool
+### 4.2 Create LXC containers in a thinpool
 
     pvcreate /dev/VG1/cachedlv
   
@@ -112,7 +121,7 @@ Add another PV to an existing Volume Group
 
     vgchange -a y
 
-## 7. Create a cachepool for a logical volume by using another SSD/HDD
+## 4. Cachepools
 
 Add the SSD raid to volume group VG1:
 
@@ -145,15 +154,15 @@ Now make a cachepool on the SSD raid:
 
     lvconvert --type cache --cachepool VG1/cachedata VG1/cachedlv
 
-## 8. LVM Snapshots
+## 5. LVM Snapshots
 
-### 8.1 Create a snapshot
+### 5.1 Create a snapshot
 
     lvcreate -L 1GB -s -n [SNAPSHOT_NAME] [LV_PATH]
 
     lvcreate -L 1GB -s -n rootlv_snap /dev/VG1/rootlv
 
-### 8.2 Restore LV with a snapshot
+### 5.2 Restore LV with a snapshot
 
     lvconvert --merge /dev/VG1/data2_snap
 
@@ -166,14 +175,14 @@ Another way is checking diskspace
 
     df -Th
     
-### 8.3 Extend a snapshot
+### 5.3 Extend a snapshot
 
     lvextend -L +1G /dev/VG1/rootlv_snap
 
-### 8.4 Reduce a snapshot
+### 5.4 Reduce a snapshot
 
-### 8.5 Autoextend snapshots
+### 5.5 Autoextend snapshots
 
-### 8.6 Use a snapshot script to make backups automatically
+### 5.6 Use a snapshot script to make backups automatically
 
-## 9. LVM and DRBD combined
+## 6. DBRD
