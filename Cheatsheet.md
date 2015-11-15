@@ -66,9 +66,27 @@ Shows all containers and if they are running or not:
 
     lvcreate -n data -L 1GB /dev/VG1
     
+### 3.1 Create Physical Volumes
+    
+    create a pv on another disk
+    
+    pvcreate /dev/md1
+    
+    or inside an LV
+    
+    pvcreate /dev/VG1/cachedlv
+    
+    or inside an LXC thinpool client
+    
+    pvcreate /dev/lxc/lxc_client2
+    
+### 3.2 Create Volume Groups 
+
+### 3.3 Create Logical Volumes
+    
 ## 6. Thinpools
 
-### 6.1 Basic Thinpools
+### 6.1 Create a basic thinpools
 
 ### 6.2 Create LXC containers in a thinpool
 
