@@ -1,11 +1,11 @@
 # Table of Contents
 
-#### 1. Ubuntu Server installation with LVM (and RAID)
-#### 2. LXC
-#### 3. Physical Volumes, Volume Groups and Logical Volumes
-#### 4. Cachepools
-#### 5. LVM Snapshots
-#### 6. DBRD
+##### 1. Ubuntu Server installation with LVM (and RAID)
+##### 2. LXC
+##### 3. Physical Volumes, Volume Groups and Logical Volumes
+##### 4. Cachepools
+##### 5. LVM Snapshots
+##### 6. DBRD
 
 ## 1. Ubuntu Server installation with LVM (and RAID)
 
