@@ -9,7 +9,15 @@
 
 ## 1. Ubuntu Server installation with LVM (and RAID)
 
+<Enter small description here>
+
+### 1. Installation
+
+- Boot the Ubuntu server image from USB stick or from CD
+
 ## 2. LXC
+
+<Enter small description here>
 
 ### 2.1 Install LXC
 
