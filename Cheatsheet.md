@@ -41,7 +41,8 @@ Add these lines to /var/lib/lxc/office1/config:
     lxc.cgroup.memory.limit_in_bytes = 512M
     lxc.cgroup.memory.memsw.limit_in_bytes = 1G
 
-### 2.3 Create and LXC container and test i
+### 2.3 Create LXC container
+
     lxc-create -t download -n office1
     lxc-start -n office1
     lxc-stop -n office1
@@ -62,27 +63,37 @@ Shows all containers and if they are running or not:
 
     lxc-ls --fancy
 
-## 3. Create PVs, VGs and LVs
+## 3. Physical Volumes, Volume Groups and Logical Volumes
 
-    lvcreate -n data -L 1GB /dev/VG1
-    
 ### 3.1 Create Physical Volumes
     
-    create a pv on another disk
+Create a pv on another disk:
     
     pvcreate /dev/md1
     
-    or inside an LV
+or inside an LV
     
     pvcreate /dev/VG1/cachedlv
     
-    or inside an LXC thinpool client
+or inside an LXC thinpool client
     
     pvcreate /dev/lxc/lxc_client2
     
 ### 3.2 Create Volume Groups 
 
-### 3.3 Create Logical Volumes
+    vgcreate VG1 /dev/md1/
+    
+    vgcreate VG2 /dev/VG1/cachedlv
+    
+### 3.3 Extend Volume Groups
+
+Add another PV to an existing Volume Group
+
+    vgextend VG1 /dev/md1
+
+### 3.4 Create Logical Volumes
+
+    lvcreate -n data -L 1GB /dev/VG1
     
 ## 6. Thinpools
 
