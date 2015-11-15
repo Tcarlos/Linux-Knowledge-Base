@@ -4,10 +4,10 @@
 
 ### 2.1 Install LXC
 
-sudo su
-apt-get update && apt-get upgrade -y
-apt-get install lxc
-reboot
+    sudo su
+    apt-get update && apt-get upgrade -y
+    apt-get install lxc
+    reboot
 
 ### 2.2 Configure LXC
 
