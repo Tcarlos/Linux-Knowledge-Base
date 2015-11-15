@@ -1,13 +1,15 @@
 ## 1. Install Ubuntu Server with RAID and LVM
 
-## 2. Install LXC
+## 2. LXC
+
+### 2.1 Install LXC
 
 sudo su
 apt-get update && apt-get upgrade -y
 apt-get install lxc
 reboot
 
-## 3. Configure LXC
+### 2.2 Configure LXC
 
     sudo su
 
@@ -39,12 +41,7 @@ Add these lines to /var/lib/lxc/office1/config:
     lxc.cgroup.memory.limit_in_bytes = 512M
     lxc.cgroup.memory.memsw.limit_in_bytes = 1G
 
-
-
-
-
-## 3. Create and test LXC container basic
-
+### 2.3 Create and LXC container and test i
     lxc-create -t download -n office1
     lxc-start -n office1
     lxc-stop -n office1
@@ -55,7 +52,7 @@ Enter the container and test networking:
     ping 8.8.8.8
     exit
     
-## 4.  Useful LXC commands
+### 2.4 Useful LXC commands
 
 Gives detailed information about a specific container:
 
@@ -65,7 +62,7 @@ Shows all containers and if they are running or not:
 
     lxc-ls --fancy
 
-### 5. Create PVs, VGs and LVs
+## 3. Create PVs, VGs and LVs
 
     lvcreate -n data -L 1GB /dev/VG1
     
