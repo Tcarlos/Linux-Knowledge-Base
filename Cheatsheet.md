@@ -199,9 +199,16 @@ Another way is checking diskspace
 
 ### 5.5 Autoextend snapshots
 
+    nano /etc/lvm/lvm.conf
+
+    snapshot_autoextend_threshold = 75
+    snapshot_autoextend_percent = 20
     
+If the snapshot volume reach 75% it will automatically expand the size of snap volume by 20% more.
 
 ### 5.6 Use a snapshot script to make backups automatically
+
+        http://askubuntu.com/questions/424225/setting-up-lvm-snapshot-as-a-backup-restore-point-in-ubuntu
 
 ## 6. DBRD
 
