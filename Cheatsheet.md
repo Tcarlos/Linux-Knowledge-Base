@@ -1,26 +1,26 @@
 # Table of Contents
 
-1. Ubuntu Server installation with LVM (and RAID)
-2. LXC
-2.1 Install LXC
-2.2 Configure LXC
-2.3 Create LXC container
-2.4 Useful LXC commands
-2.5 Clone Containers
-2.6 Delete Containers
-3. Physical Volumes, Volume Groups and Logical Volumes
-3.1 Create Physical Volumes
-3.2 Create Volume Groups
-3.3 Extend Volume Groups
-3.4 Create Logical Volumes 
-4. Cachepools
-5. LVM Snapshots
-5.1 Create a snapshot
-5.2 Restore LV with a snapshot
-5.3 Extend a snapshot
-5.4 Reduce a snapshot
-5.5 Autoextend snapshots
-5.6 Use a snapshot script to make backups automatically
+    1. Ubuntu Server installation with LVM (and RAID)
+    2. LXC
+    2.1 Install LXC
+    2.2 Configure LXC
+    2.3 Create LXC container
+    2.4 Useful LXC commands
+    2.5 Clone Containers
+    2.6 Delete Containers
+    3. Physical Volumes, Volume Groups and Logical Volumes
+    3.1 Create Physical Volumes
+    3.2 Create Volume Groups
+    3.3 Extend Volume Groups
+    3.4 Create Logical Volumes 
+    4. Cachepools
+    5. LVM Snapshots
+    5.1 Create a snapshot
+    5.2 Restore LV with a snapshot
+    5.3 Extend a snapshot
+    5.4 Reduce a snapshot
+    5.5 Autoextend snapshots
+    5.6 Use a snapshot script to make backups automatically
 
 6. DBRD
 
