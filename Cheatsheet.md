@@ -232,7 +232,7 @@ Do note however, that the new container has no problem. So it could be that the 
 
 ## 8. TO DO
 
--fix the bugs of lxc_client1 and lxc_client2 (DONE)
+-fix the bugs of lxc_client1 and lxc_client2 (HANDLED, PROBABLY OSBOLETE ERROR)
 -complete snapshot cheatsheet section
 -include a couple of DBRD sections
 - make restore snapshot of lxc thinpool containers work OR: RUN TESTCASE 3: include DRBD in the advanced LXC setup with thinpools and snapshots!
