@@ -155,3 +155,6 @@ Confirm data LV has been restored to the situation that has only 3 files
     lxc lxc twi-a-tz-- 6.96g 0.00 0.73
     root@livenode5:/home/office# lxc-create -t download -n lxc_client1 -B lvm --fssize=2G
     vgchange -a y
+
+
+# TESTCASE 3: include DRBD in the advanced LXC setup with thinpools and snapshots
