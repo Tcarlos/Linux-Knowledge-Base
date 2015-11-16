@@ -83,6 +83,10 @@ Shows all containers and if they are running or not:
     
 ### 2.5 Clone Containers
 
+### 2.6 Delete Containers
+
+    lxc-destroy -n office4
+
 ## 3. Physical Volumes, Volume Groups and Logical Volumes
 
 ### 3.1 Create Physical Volumes
@@ -191,7 +195,11 @@ Another way is checking diskspace
 
 ### 5.4 Reduce a snapshot
 
+    lvreduce -L +1G /dev/VG1/rootlv_snap
+
 ### 5.5 Autoextend snapshots
+
+    
 
 ### 5.6 Use a snapshot script to make backups automatically
 
