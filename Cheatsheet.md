@@ -222,20 +222,20 @@ lxc-start: start.c: do_start: 699 failed to setup the container
 lxc-start: sync.c: __sync_wait: 51 invalid sequence number 1. expected 2
 lxc-start: start.c: __lxc_start: 1164 failed to spawn 'lxc_client1'
 
+**update**
 googled and got solutions to check idmap lines, done so already, or permissions, also.
-Perhaps it's this
-
+Perhaps it's this https://github.com/lxc/lxc/issues/406, this suggests it could be a template matter.
+A workaround could be to make a snapshot and merge right away to restore but to no avail
+Do note however, that the new container has no problem. So it could be that the first two just dont work coz the whole LV setup got changed between client1/client2 versus client3.
+**Update** make client4 and monitor the workings of client3 and client4. If after a few days there is still no error, we can discard this bug as a child of wrong config, a situation that is obsolete coz with a working system as i have now there are simply no problems.
 
 
 ## 8. TO DO
 
--fix the bugs of lxc_client1 and lxc_client2
+-fix the bugs of lxc_client1 and lxc_client2 (DONE)
 -complete snapshot cheatsheet section
 -include a couple of DBRD sections
-- make restore snapshot of lxc thinpool containers work. 
-
-
-OR: RUN TESTCASE 3: include DRBD in the advanced LXC setup with thinpools and snapshots!
+- make restore snapshot of lxc thinpool containers work OR: RUN TESTCASE 3: include DRBD in the advanced LXC setup with thinpools and snapshots!
 
 blockdevice explanation
 Here we try to explain the increddible complex partitioning/RAID/DRBD/LVM cahe thinpool stuff. Dont do this, it will be explained step by step. but its a good reference for explanation.
