@@ -197,6 +197,8 @@ Another way is checking diskspace
 
 ## 7. Bugs
 
+## Bug #1
+
 lxc lvm container: cant start containers after reboot, 
 
 lxc-start: bdev.c: mount_unknown_fs: 210 failed to determine fs type for '/dev/lxc/lxc_client2'
@@ -206,9 +208,26 @@ lxc-start: conf.c: do_rootfs_setup: 3713 failed to setup rootfs for 'lxc_client2
 lxc-start: start.c: __lxc_start: 1155 Error setting up rootfs mount as root before spawn
 lxc-start: lxc_start.c: main: 344 The container failed to start.
 
+
+### Bug #2
+
+lxc-start -n lxc_client1 -F
+lxc-start: conf.c: mount_rootfs: 873 No such file or directory - failed to get real path for '/dev/lxc/lxc_client1'
+lxc-start: conf.c: setup_rootfs: 1280 failed to mount rootfs
+lxc-start: conf.c: do_rootfs_setup: 3713 failed to setup rootfs for 'lxc_client1'
+lxc-start: conf.c: lxc_setup: 3795 Error setting up rootfs mount after spawn
+lxc-start: start.c: do_start: 699 failed to setup the container
+lxc-start: sync.c: __sync_wait: 51 invalid sequence number 1. expected 2
+lxc-start: start.c: __lxc_start: 1164 failed to spawn 'lxc_client1'
+
+
 ## 8. TO DO
 
-make restore snapshot of lxc thinpool containers work. 
+-fix the bugs of lxc_client1 and lxc_client2
+-complete snapshot cheatsheet section
+-include a couple of DBRD sections
+- make restore snapshot of lxc thinpool containers work. 
+
 
 OR: RUN TESTCASE 3: include DRBD in the advanced LXC setup with thinpools and snapshots!
 
