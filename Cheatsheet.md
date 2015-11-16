@@ -222,6 +222,10 @@ lxc-start: start.c: do_start: 699 failed to setup the container
 lxc-start: sync.c: __sync_wait: 51 invalid sequence number 1. expected 2
 lxc-start: start.c: __lxc_start: 1164 failed to spawn 'lxc_client1'
 
+googled and got solutions to check idmap lines, done so already, or permissions, also.
+Perhaps it's this
+
+
 
 ## 8. TO DO
 
