@@ -22,8 +22,6 @@
     5.5 Autoextend snapshots
     5.6 Use a snapshot script to make backups automatically
 
-6. DBRD
-
 ## 1. Ubuntu Server installation with LVM (and RAID)
 
 <Enter small description here>
