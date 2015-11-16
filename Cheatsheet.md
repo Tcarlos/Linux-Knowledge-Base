@@ -80,6 +80,8 @@ Gives detailed information about a specific container:
 Shows all containers and if they are running or not:
 
     lxc-ls --fancy
+    
+### 2.5 Clone Containers
 
 ## 3. Physical Volumes, Volume Groups and Logical Volumes
 
