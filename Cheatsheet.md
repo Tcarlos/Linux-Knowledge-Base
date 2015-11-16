@@ -1,11 +1,11 @@
 # Table of Contents
 
-##### 1. Ubuntu Server installation with LVM (and RAID)
-##### 2. LXC
-##### 3. Physical Volumes, Volume Groups and Logical Volumes
-##### 4. Cachepools
-##### 5. LVM Snapshots
-##### 6. DBRD
+1. Ubuntu Server installation with LVM (and RAID)
+2. LXC
+3. Physical Volumes, Volume Groups and Logical Volumes
+4. Cachepools
+5. LVM Snapshots
+6. DBRD
 
 ## 1. Ubuntu Server installation with LVM (and RAID)
 
@@ -194,3 +194,37 @@ Another way is checking diskspace
 ### 5.6 Use a snapshot script to make backups automatically
 
 ## 6. DBRD
+
+## 7. Bugs
+
+lxc lvm container: cant start containers after reboot, 
+
+lxc-start: bdev.c: mount_unknown_fs: 210 failed to determine fs type for '/dev/lxc/lxc_client2'
+lxc-start: conf.c: mount_unknown_fs: 525 failed to determine fs type for '/dev/dm-10'
+lxc-start: conf.c: setup_rootfs: 1280 failed to mount rootfs
+lxc-start: conf.c: do_rootfs_setup: 3713 failed to setup rootfs for 'lxc_client2'
+lxc-start: start.c: __lxc_start: 1155 Error setting up rootfs mount as root before spawn
+lxc-start: lxc_start.c: main: 344 The container failed to start.
+
+## 8. TO DO
+
+make restore snapshot of lxc thinpool containers work. 
+
+OR: RUN TESTCASE 3: include DRBD in the advanced LXC setup with thinpools and snapshots!
+
+blockdevice explanation
+Here we try to explain the increddible complex partitioning/RAID/DRBD/LVM cahe thinpool stuff. Dont do this, it will be explained step by step. but its a good reference for explanation.
+
+First we need (at least) two HDDs and two SSDs fysically available. Lets call the HDDs /dev/sda and /dev/sdb and the SSDs /dev/sdc/ and /dev/sdd
+now we want to combine these fysical disk in to RAID 1 (mirror) arrays so we can handle a device failure without major problems. We do this by combineing /dev/sda and /dev/sdb in to /dev/md0 and /dev/sdc and /dev/sdd to /dev/md1. So we are left with two redundant blockdevices: a giant slow /dev/md0 and a smaller fast /dev/md1
+Now we need to make /dev/md0 a PV so we can use it as a source for LVM. After this we will create a VG on top of that. Within that VG we will create the crucial LVM's:
+bootlv (/boot)
+swaplv (SWAP)
+rootlv (/)
+cachedLV (this LV will be cached by the SSD)
+Then we create from the /dev/md1 (fast SSDs) a PV and then ADD IT to the existing VG (that was only on /dev/md0 till now). We now can create specifically on the /dev/md1 two LV's that together form a cachepool. This cacheppol again will be combined with the chachedLV (on the slow /dev/dm0) so we have a truly cached LV.
+This cached LV will become a PV of its own with a own VG. Within that VG we create a thinpool. Most of the space within that VG will be uses to create one LV.
+the just created (cached) LV now will be the basis of DRBD.
+the DRBD blockdevice now will become a PV and we put a VG on that.
+On this VG we will create two LV's: a metadata and data partition. Together they form a thinpool that will be used for the creation of LXC LV's (for the containers)
+Notes: we cant cache a thinpool so we first had to create a cached LV and then base a thinpool on top of that. We also needed under the DRBD a thinpool because we want to snapshot the DRBD. On ttop of the DRBD we need a thinpool so we can snapshot the LXC lvs. We dont want thinpool for our most important partitions because of possible filling of thinpool and the becomming unusable of the lvs in thath case.
