@@ -134,6 +134,19 @@ Add another PV to an existing Volume Group
 
     lvcreate -n data -L 1GB /dev/VG1
     
+### 3.5 Remove PVs, VGs, LVs
+
+    lvremove
+    vgremove
+    pvremove
+    pvremove /dev/md1 --force --force
+    
+If you ever encounter an unknown device with pvs, use this command
+
+
+vgreduce --removemissing VG1
+
+    
 ## 4. Thinpools
 
     pvcreate /dev/VG1/cachedlv  (autoset 9GB)
@@ -240,7 +253,32 @@ If the snapshot volume reach 75% it will automatically expand the size of snap v
 - helpful links: https://www.howtoforge.com/setting-up-network-raid1-with-drbd-on-debian-squeeze and https://drbd.linbit.com/users-guide/
 - Why DRBD: We also needed under the DRBD a thinpool because we want to snapshot the DRBD. On ttop of the DRBD we need a thinpool so we can snapshot the LXC lvs.
 - short description: DRBD is like a networked RAID
--
+
+clue: 
+
+    lvcreate -n DRBDLV -V 1g --thinpool CachedRawDRBDVG/CachedRawDRBDThinpool
+    
+Where we create a thinpool with the name DRBDLV in VG CachedRAWDRBDVG on top of LV CachedRAWDRBDthinpool.
+
+deleting previous made thinpool with
+
+    root@livenode1:/home/office# lvremove thinpool1 VG2
+    
+appearantly there needs to be created an LV named CachedRAWDRBDthinpool on VG CachedRawDRBDVRG
+
+    lvcreate -n CachedRawDRBDThinpool -l 428 CachedRawDRBDVG
+    
+    vgcreate CachedRawDRBDVG /dev/testvg/CachedRawDRBDPV
+
+### 6.1 DRBD test case setup
+
+So reversed engineered, this needs to be done:
+
+- pvcreate CachedRawDRBDPV
+- vgcreate CachedRawDRBDVG
+- lvcreate -n CachedRawDRBDThinpool -l 428 CachedRawDRBDVG
+- lvcreate -n DRBDLV -V 1g --thinpool CachedRawDRBDVG/CachedRawDRBDThinpool
+
 
 ## 7. Bugs
 
