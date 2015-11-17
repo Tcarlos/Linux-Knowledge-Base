@@ -136,6 +136,14 @@ Add another PV to an existing Volume Group
     
 ## 4. Thinpools
 
+    pvcreate /dev/VG1/cachedlv  (autoset 9GB)
+    Physical volume "/dev/VG1/cachedlv" successfully created 
+    vgcreate VG2 /dev/VG1/cachedlv (using the 9GB of the PV)
+    lvcreate -L 9G --thinpool thinpool1 VG2
+    
+
+    
+
 ### 4.1 Create a basic thinpools
 
 ### 4.2 Create LXC containers in a thinpool
@@ -225,7 +233,14 @@ If the snapshot volume reach 75% it will automatically expand the size of snap v
 
         http://askubuntu.com/questions/424225/setting-up-lvm-snapshot-as-a-backup-restore-point-in-ubuntu
 
-## 6. DBRD
+## 6. DRBD
+
+- installation: apt-get install drbd-utils
+- confirm: appearantly one needs to check pvdisplay and look up PE size and amount of available PE (free PVe)
+- helpful links: https://www.howtoforge.com/setting-up-network-raid1-with-drbd-on-debian-squeeze and https://drbd.linbit.com/users-guide/
+- Why DRBD: We also needed under the DRBD a thinpool because we want to snapshot the DRBD. On ttop of the DRBD we need a thinpool so we can snapshot the LXC lvs.
+- short description: DRBD is like a networked RAID
+-
 
 ## 7. Bugs
 
