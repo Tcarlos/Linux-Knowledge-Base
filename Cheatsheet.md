@@ -265,6 +265,7 @@ Do note however, that the new container has no problem. So it could be that the 
 - complete snapshot cheatsheet section
 - include a couple of DBRD sections
 - make restore snapshot of lxc thinpool containers work OR: RUN TESTCASE 3: include DRBD in the advanced LXC setup with thinpools and snapshots!
+- https://gitlab.rimotecloud.com/tmarinus/mainline-rve/blob/GL1/docs/install.md implement Richards LXC config section1
 
 blockdevice explanation
 Here we try to explain the increddible complex partitioning/RAID/DRBD/LVM cahe thinpool stuff. Dont do this, it will be explained step by step. but its a good reference for explanation.
