@@ -279,6 +279,37 @@ So reversed engineered, this needs to be done:
 - lvcreate -n CachedRawDRBDThinpool -l 428 CachedRawDRBDVG
 - lvcreate -n DRBDLV -V 1g --thinpool CachedRawDRBDVG/CachedRawDRBDThinpool
 
+Verify a completely free disk
+
+    lsblk
+
+create a pv on it
+
+    pvcreate /dev/md1
+    
+create a vg on top of this
+
+    vgcreate CachedRawDRBDVG /dev/md1
+    
+check free PE
+
+    vgdisplay
+    
+This shows 1278 free extents. Now, create an LV end use all of the extents for it
+
+    lvcreate -l 1278 -n cachedrawDRBDLV1 cachedrawDRBDVG
+    
+Confirm there is no more space on pv
+
+    pvs
+    
+
+
+
+
+
+
+
 
 ## 7. Bugs
 
