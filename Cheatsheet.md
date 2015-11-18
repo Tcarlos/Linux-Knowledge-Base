@@ -297,7 +297,7 @@ check free PE
     
 This shows 1278 free extents. Now, create an LV end use all of the extents for it
 
-    lvcreate -l 1278 -n cachedrawDRBDLV1 cachedrawDRBDVG
+    lvcreate -l 1278 -n cachedrawDRBDLV1 CachedRawDRBDVG
     
 Confirm there is no more space on pv
 
