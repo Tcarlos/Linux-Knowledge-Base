@@ -279,35 +279,107 @@ So reversed engineered, this needs to be done:
 - lvcreate -n CachedRawDRBDThinpool -l 428 CachedRawDRBDVG
 - lvcreate -n DRBDLV -V 1g --thinpool CachedRawDRBDVG/CachedRawDRBDThinpool
 
-Verify a completely free disk
-
-    lsblk
-
-create a pv on it
-
-    pvcreate /dev/md1
+    lvs
     
-create a vg on top of this
+    LV       VG   Attr       LSize   Pool Origin Data%  Meta%                          Move Log Cpy%Sync Convert
+  bootlv   VG1  -wi-ao---- 952.00m                                                   
+  cachedLV VG1  -wi-a-----  10.00g                                                   
+  rootlv   VG1  -wi-ao----   2.79g                                                   
+  swaplv   VG1  -wi-ao---- 952.00m  
+  
+  pvcreate /dev/md1
+  vgextend VG1 /dev/md1
 
-    vgcreate CachedRawDRBDVG /dev/md1
-    
-check free PE
+ lvcreate -L 100M -n cachemeta VG                        1 /dev/md1
+  Logical volume "cachemeta" created
+root@livenode5:/home/office# lvcreate -L 4G -n cachedata VG1                         /dev/md1
+  Logical volume "cachedata" created
+root@livenode5:/home/office# lvconvert --type cache-pool --ca                        chemode writethrough --poolmetadata VG1/cachemeta VG1/cacheda                        ta
+  WARNING: Converting logical volume VG1/cachedata and VG1/ca                        chemeta to pool's data and metadata volumes.
+  THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc                        .)
+Do you really want to convert VG1/cachedata and VG1/cachemeta                        ? [y/n]: y
+  Logical volume "lvol0" created
+  Converted VG1/cachedata to cache pool.
+root@livenode5:/home/office# lvconvert --type cache --cachepo                        ol VG1/cachedata VG1/cachedlv
+  Can't find LV cachedlv in VG VG1
+root@livenode5:/home/office# lvconvert --type cache --cachepo                        ol VG1/cachedata VG1/cachedLV
+  Logical volume VG1/cachedLV is now cached.
 
-    vgdisplay
-    
-This shows 1278 free extents. Now, create an LV end use all of the extents for it
+nano /etc/lvm/lvm.conf
+root@livenode5:/home/office# service lvm2 restart
+root@livenode5:/home/office# /etc/init.d/lvm2 restart
+root@livenode5:/home/office# vgck
+root@livenode5:/home/office# pvcreate /dev/VG1/cachedLV
+  Physical volume "/dev/VG1/cachedLV" successfully created
+root@livenode5:/home/office# vgcreate DRBDVG /dev/VG1/CachedLV
+  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  Device /dev/VG1/CachedLV not found (or ignored by filtering).
+  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  Unable to add physical volume '/dev/VG1/CachedLV' to volume group 'DRBDVG'.
+root@livenode5:/home/office# lvs
+  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  LV        VG   Attr       LSize   Pool      Origin           Data%  Meta%  Move Log Cpy%Sync Convert
+  bootlv    VG1  -wi-ao---- 952.00m                                                  
+  cachedLV  VG1  Cwi-a-C---  10.00g cachedata [cachedLV_corig]                       
+  cachedata VG1  Cwi---C---   4.00g                                                  
+  rootlv    VG1  -wi-ao----   2.79g                                                  
+  swaplv    VG1  -wi-ao---- 952.00m                                                  
+root@livenode5:/home/office# vgcreate DRBDVG /dev/VG1/cachedLV
+  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  Physical volume "/dev/VG1/cachedLV" successfully created
+  Volume group "DRBDVG" successfully created
+root@livenode5:/home/office# vgdisplay
+  Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  --- Volume group ---
+  VG Name               DRBDVG
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  1
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               10.00 GiB
+  PE Size               4.00 MiB
+  Total PE              2559
+  Alloc PE / Size       0 / 0
+  Free  PE / Size       2559 / 10.00 GiB
+  VG UUID               7eRPUy-vDel-tyYm-3JpP-u1eN-fEF2-5H0tSG
 
-    lvcreate -l 1278 -n cachedrawDRBDLV1 CachedRawDRBDVG
-    
-Confirm there is no more space on pv
+  --- Volume group ---
+  VG Name               VG1
+  System ID
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  70
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                5
+  Open LV               3
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               24.97 GiB
+  PE Size               4.00 MiB
+  Total PE              6393
+  Alloc PE / Size       4825 / 18.85 GiB
+  Free  PE / Size       1568 / 6.12 GiB
+  VG UUID               8xK127-ouHI-MJHp-bEdS-BZsk-s8Gu-GR0eg3
 
-    pvs
-    
-
-
-
-
-
+root@livenode5:/home/office# lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
+  Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  Logical volume "cachedDRBDthinpool" created
 
 
 
