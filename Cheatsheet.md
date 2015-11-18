@@ -202,7 +202,7 @@ Now make a cachepool on the SSD raid:
 
     lvconvert --type cache-pool --cachemode writethrough --poolmetadata VG1/cachemeta VG1/cachedata
 
-    lvconvert --type cache --cachepool VG1/cachedata VG1/cachedlv
+    lvconvert --type cache --cachepool VG1/cachedata VG1/cachedLV
 
 ## 5. LVM Snapshots
 
