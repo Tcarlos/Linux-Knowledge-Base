@@ -284,34 +284,34 @@ Set in /etc/lvm/lvm.conf:
     /etc/init.d/lvm2 restart
     vgck
 
-pvcreate /dev/VG1/cachedLV
-  Physical volume "/dev/VG1/cachedLV" successfully created
+    pvcreate /dev/VG1/cachedLV
+        Physical volume "/dev/VG1/cachedLV" successfully created
                                             
-vgcreate DRBDVG /dev/VG1/cachedLV
-  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
-  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
-  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  Physical volume "/dev/VG1/cachedLV" successfully created
-  Volume group "DRBDVG" successfully created
+    vgcreate DRBDVG /dev/VG1/cachedLV
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        Physical volume "/dev/VG1/cachedLV" successfully created
+        Volume group "DRBDVG" successfully created
 
-lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
-  Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  Logical volume "cachedDRBDthinpool" created
+    lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
+        Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        Logical volume "cachedDRBDthinpool" created
   
-lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
-  Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  Logical volume "cachedDRBD_thin_meta" created
-lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
-  Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  WARNING: Converting logical volume DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta to pool's data and metadata volumes.
-  THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
-Do you really want to convert DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta? [y/n]: y
-  Logical volume "lvol0" created
-  Converted DRBDVG/cachedDRBDthinpool to thin pool.
+    lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
+        Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        Logical volume "cachedDRBD_thin_meta" created
+    lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
+        Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        WARNING: Converting logical volume DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta to pool's data and metadata volumes.
+        THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
+        Do you really want to convert DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta? [y/n]: y
+        Logical volume "lvol0" created
+        Converted DRBDVG/cachedDRBDthinpool to thin pool.
   
-touch /etc/drbd.d/r0.res
+    touch /etc/drbd.d/r0.res
 
     resource r0 {
      on livenode5 {
