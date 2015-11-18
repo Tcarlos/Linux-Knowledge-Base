@@ -380,6 +380,54 @@ root@livenode5:/home/office# vgdisplay
 root@livenode5:/home/office# lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
   Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
   Logical volume "cachedDRBDthinpool" created
+  
+   lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
+  Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  Logical volume "cachedDRBD_thin_meta" created
+root@livenode5:/home/office# G
+lvconvert --type thin-pool --poolmetadata CachedRawDRBDVG/CachedRawDRBDThinMeta CachedRawDRBDVG/CachedRawDRBDThinpoolG: command not found
+root@livenode5:/home/office#
+root@livenode5:/home/office# lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta cachedDRBDVG/cachedDRBDthinpool
+  Please use a single volume group name ("cachedDRBDVG" or "DRBDVG")
+  Run `lvconvert --help' for more information.
+root@livenode5:/home/office# lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
+  Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+  WARNING: Converting logical volume DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta to pool's data and metadata volumes.
+  THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
+Do you really want to convert DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta? [y/n]: y
+  Logical volume "lvol0" created
+  Converted DRBDVG/cachedDRBDthinpool to thin pool.
+
+resource r0 {
+ on livenode5 {
+   device /dev/drbd0;
+   disk /dev/mapper/DRBDVG-DRBDLV1;
+   address 127.0.0.1:7789;
+   meta-disk internal;
+  }
+ }
+
+resource r0-U {
+  net {
+    protocol A;
+  }
+
+
+  stacked-on-top-of r0 {
+    device /dev/drbd10;
+    address 127.0.0.1:7791;
+  }
+
+  on bullshit {
+    device /dev/drbd10;
+    disk /dev/bulldisk;
+    address 127.0.0.1:7794;
+    meta-disk internal;
+  }
+}
+
+had to edit a } sign and change hostname.
+
 
 
 
