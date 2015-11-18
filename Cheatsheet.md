@@ -248,84 +248,46 @@ If the snapshot volume reach 75% it will automatically expand the size of snap v
 
 ## 6. DRBD
 
-- installation: apt-get install drbd-utils
-- confirm: appearantly one needs to check pvdisplay and look up PE size and amount of available PE (free PVe)
-- helpful links: https://www.howtoforge.com/setting-up-network-raid1-with-drbd-on-debian-squeeze and https://drbd.linbit.com/users-guide/
-- Why DRBD: We also needed under the DRBD a thinpool because we want to snapshot the DRBD. On ttop of the DRBD we need a thinpool so we can snapshot the LXC lvs.
-- short description: DRBD is like a networked RAID
+Why DRBD: We also needed under the DRBD a thinpool because we want to snapshot the DRBD. On ttop of the DRBD we need a thinpool so we can snapshot the LXC lvs. DRBD is like a networked RAID
 
-clue: 
-
-    lvcreate -n DRBDLV -V 1g --thinpool CachedRawDRBDVG/CachedRawDRBDThinpool
+### 6.1 Setup 
     
-Where we create a thinpool with the name DRBDLV in VG CachedRAWDRBDVG on top of LV CachedRAWDRBDthinpool.
-
-deleting previous made thinpool with
-
-    root@livenode1:/home/office# lvremove thinpool1 VG2
-    
-appearantly there needs to be created an LV named CachedRAWDRBDthinpool on VG CachedRawDRBDVRG
-
-    lvcreate -n CachedRawDRBDThinpool -l 428 CachedRawDRBDVG
-    
-    vgcreate CachedRawDRBDVG /dev/testvg/CachedRawDRBDPV
-
-### 6.1 DRBD test case setup
-
-So reversed engineered, this needs to be done:
-
-- pvcreate CachedRawDRBDPV
-- vgcreate CachedRawDRBDVG
-- lvcreate -n CachedRawDRBDThinpool -l 428 CachedRawDRBDVG
-- lvcreate -n DRBDLV -V 1g --thinpool CachedRawDRBDVG/CachedRawDRBDThinpool
-
     lvs
     
-    LV       VG   Attr       LSize   Pool Origin Data%  Meta%                          Move Log Cpy%Sync Convert
-  bootlv   VG1  -wi-ao---- 952.00m                                                   
-  cachedLV VG1  -wi-a-----  10.00g                                                   
-  rootlv   VG1  -wi-ao----   2.79g                                                   
-  swaplv   VG1  -wi-ao---- 952.00m  
+    LV       VG   Attr       LSize   Pool Origin Data%  Meta%
+    bootlv   VG1  -wi-ao---- 952.00m                                                   
+    cachedLV VG1  -wi-a-----  10.00g                                                   
+    rootlv   VG1  -wi-ao----   2.79g                                                   
+    swaplv   VG1  -wi-ao---- 952.00m  
   
-  pvcreate /dev/md1
-  vgextend VG1 /dev/md1
+    pvcreate /dev/md1
+    vgextend VG1 /dev/md1
 
- lvcreate -L 100M -n cachemeta VG                        1 /dev/md1
-  Logical volume "cachemeta" created
-root@livenode5:/home/office# lvcreate -L 4G -n cachedata VG1                         /dev/md1
-  Logical volume "cachedata" created
-root@livenode5:/home/office# lvconvert --type cache-pool --ca                        chemode writethrough --poolmetadata VG1/cachemeta VG1/cacheda                        ta
-  WARNING: Converting logical volume VG1/cachedata and VG1/ca                        chemeta to pool's data and metadata volumes.
-  THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc                        .)
-Do you really want to convert VG1/cachedata and VG1/cachemeta                        ? [y/n]: y
-  Logical volume "lvol0" created
-  Converted VG1/cachedata to cache pool.
-root@livenode5:/home/office# lvconvert --type cache --cachepo                        ol VG1/cachedata VG1/cachedlv
-  Can't find LV cachedlv in VG VG1
-root@livenode5:/home/office# lvconvert --type cache --cachepo                        ol VG1/cachedata VG1/cachedLV
-  Logical volume VG1/cachedLV is now cached.
+    lvcreate -L 100M -n cachemeta VG1 /dev/md1
+        Logical volume "cachemeta" created
+    lvcreate -L 4G -n cachedata VG1 /dev/md1
+        Logical volume "cachedata" created
+    
+    lvconvert --type cache-pool --cachemode writethrough --poolmetadata VG1/cachemeta VG1/cachedata
+    WARNING: Converting logical volume VG1/cachedata and VG1/cachemeta to pool's data and metadata volumes.
+    THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
+    Do you really want to convert VG1/cachedata and VG1/cachemeta? [y/n]: y
+        Logical volume "lvol0" created
+        Converted VG1/cachedata to cache pool.
+    lvconvert --type cache --cachepool VG1/cachedata VG1/cachedLV
+        Logical volume VG1/cachedLV is now cached.
 
-nano /etc/lvm/lvm.conf
-root@livenode5:/home/office# service lvm2 restart
-root@livenode5:/home/office# /etc/init.d/lvm2 restart
-root@livenode5:/home/office# vgck
-root@livenode5:/home/office# pvcreate /dev/VG1/cachedLV
+Set in /etc/lvm/lvm.conf:
+
+    filter = [ "r|/dev/mapper/testvg-CachedRawDRBDPV_corig|" ]
+    
+    /etc/init.d/lvm2 restart
+    vgck
+
+pvcreate /dev/VG1/cachedLV
   Physical volume "/dev/VG1/cachedLV" successfully created
-root@livenode5:/home/office# vgcreate DRBDVG /dev/VG1/CachedLV
-  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  Device /dev/VG1/CachedLV not found (or ignored by filtering).
-  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
-  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  Unable to add physical volume '/dev/VG1/CachedLV' to volume group 'DRBDVG'.
-root@livenode5:/home/office# lvs
-  Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  LV        VG   Attr       LSize   Pool      Origin           Data%  Meta%  Move Log Cpy%Sync Convert
-  bootlv    VG1  -wi-ao---- 952.00m                                                  
-  cachedLV  VG1  Cwi-a-C---  10.00g cachedata [cachedLV_corig]                       
-  cachedata VG1  Cwi---C---   4.00g                                                  
-  rootlv    VG1  -wi-ao----   2.79g                                                  
-  swaplv    VG1  -wi-ao---- 952.00m                                                  
-root@livenode5:/home/office# vgcreate DRBDVG /dev/VG1/cachedLV
+                                            
+vgcreate DRBDVG /dev/VG1/cachedLV
   Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
   Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
   Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
@@ -333,100 +295,81 @@ root@livenode5:/home/office# vgcreate DRBDVG /dev/VG1/cachedLV
   Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
   Physical volume "/dev/VG1/cachedLV" successfully created
   Volume group "DRBDVG" successfully created
-root@livenode5:/home/office# vgdisplay
-  Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-  --- Volume group ---
-  VG Name               DRBDVG
-  System ID
-  Format                lvm2
-  Metadata Areas        1
-  Metadata Sequence No  1
-  VG Access             read/write
-  VG Status             resizable
-  MAX LV                0
-  Cur LV                0
-  Open LV               0
-  Max PV                0
-  Cur PV                1
-  Act PV                1
-  VG Size               10.00 GiB
-  PE Size               4.00 MiB
-  Total PE              2559
-  Alloc PE / Size       0 / 0
-  Free  PE / Size       2559 / 10.00 GiB
-  VG UUID               7eRPUy-vDel-tyYm-3JpP-u1eN-fEF2-5H0tSG
 
-  --- Volume group ---
-  VG Name               VG1
-  System ID
-  Format                lvm2
-  Metadata Areas        2
-  Metadata Sequence No  70
-  VG Access             read/write
-  VG Status             resizable
-  MAX LV                0
-  Cur LV                5
-  Open LV               3
-  Max PV                0
-  Cur PV                2
-  Act PV                2
-  VG Size               24.97 GiB
-  PE Size               4.00 MiB
-  Total PE              6393
-  Alloc PE / Size       4825 / 18.85 GiB
-  Free  PE / Size       1568 / 6.12 GiB
-  VG UUID               8xK127-ouHI-MJHp-bEdS-BZsk-s8Gu-GR0eg3
-
-root@livenode5:/home/office# lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
+lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
   Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
   Logical volume "cachedDRBDthinpool" created
   
-   lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
+lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
   Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
   Logical volume "cachedDRBD_thin_meta" created
-root@livenode5:/home/office# G
-lvconvert --type thin-pool --poolmetadata CachedRawDRBDVG/CachedRawDRBDThinMeta CachedRawDRBDVG/CachedRawDRBDThinpoolG: command not found
-root@livenode5:/home/office#
-root@livenode5:/home/office# lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta cachedDRBDVG/cachedDRBDthinpool
-  Please use a single volume group name ("cachedDRBDVG" or "DRBDVG")
-  Run `lvconvert --help' for more information.
-root@livenode5:/home/office# lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
+lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
   Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
   WARNING: Converting logical volume DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta to pool's data and metadata volumes.
   THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
 Do you really want to convert DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta? [y/n]: y
   Logical volume "lvol0" created
   Converted DRBDVG/cachedDRBDthinpool to thin pool.
+  
+touch /etc/drbd.d/r0.res
 
-resource r0 {
- on livenode5 {
-   device /dev/drbd0;
-   disk /dev/mapper/DRBDVG-DRBDLV1;
-   address 127.0.0.1:7789;
-   meta-disk internal;
-  }
- }
+    resource r0 {
+     on livenode5 {
+       device /dev/drbd0;
+       disk /dev/mapper/DRBDVG-DRBDLV1;
+       address 127.0.0.1:7789;
+       meta-disk internal;
+     }
+    }
 
-resource r0-U {
-  net {
-    protocol A;
-  }
+    resource r0-U {
+      net {
+        protocol A;
+      }
 
 
-  stacked-on-top-of r0 {
-    device /dev/drbd10;
-    address 127.0.0.1:7791;
-  }
+      stacked-on-top-of r0 {
+        device /dev/drbd10;
+        address 127.0.0.1:7791;
+      }
 
-  on bullshit {
-    device /dev/drbd10;
-    disk /dev/bulldisk;
-    address 127.0.0.1:7794;
-    meta-disk internal;
-  }
-}
+      on bullshit {
+        device /dev/drbd10;
+        disk /dev/bulldisk;
+        address 127.0.0.1:7794;
+        meta-disk internal;
+      }
+    }
+    
+    drbdadm create-md r0
+    initializing activity log
+    NOT initializing bitmap
+    Writing meta data...
+    New drbd meta data block successfully created.
+    
+    drbdadm -- --overwrite-data-of-peer primary r0
+    drbdadm up r0
+    /etc/drbd.d/r0.res:1: in resource r0:
+        Missing section 'on <PEER> { ... }'.
+    Device '0' is configured!
+    Command 'drbdmeta 0 v08 /dev/mapper/DRBDVG-DRBDLV1 internal apply-al' terminated with exit code 20
+    
+**IGNORE ERROR**
 
-had to edit a } sign and change hostname.
+    service drbd restart
+    drbdadm create-md --stacked r0-U drbdadm up --stacked r0-U drbdadm primary --stacked r0-U
+        initializing activity log
+        NOT initializing bitmap
+        Writing meta data...
+        New drbd meta data block successfully created.
+        'drbdadm' not defined in your config (for this host).
+    
+    cat /proc/drbd
+    version: 8.4.5 (api:1/proto:86-101)
+    srcversion: 82483CBF1A7AFF700CBEEC5
+    0: cs:StandAlone ro:Primary/Unknown ds:UpToDate/DUnknown   r----s
+    ns:0 nr:0 dw:40 dr:1592 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:1048508
+
 
 
 
