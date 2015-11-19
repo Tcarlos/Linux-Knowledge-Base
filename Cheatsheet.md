@@ -260,15 +260,18 @@ Why DRBD: We also needed under the DRBD a thinpool because we want to snapshot t
     rootlv   VG1  -wi-ao----   2.79g                                                   
     swaplv   VG1  -wi-ao---- 952.00m  
   
+Add another device to the Volume Group:
+    
     pvcreate /dev/md1
     vgextend VG1 /dev/md1
+    
+Create a cachepool on it:
 
     lvcreate -L 100M -n cachemeta VG1 /dev/md1
         Logical volume "cachemeta" created
     lvcreate -L 4G -n cachedata VG1 /dev/md1
         Logical volume "cachedata" created
-    
-    lvconvert --type cache-pool --cachemode writethrough --poolmetadata VG1/cachemeta VG1/cachedata
+        lvconvert --type cache-pool --cachemode writethrough --poolmetadata VG1/cachemeta VG1/cachedata
     WARNING: Converting logical volume VG1/cachedata and VG1/cachemeta to pool's data and metadata volumes.
     THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
     Do you really want to convert VG1/cachedata and VG1/cachemeta? [y/n]: y
@@ -279,10 +282,12 @@ Why DRBD: We also needed under the DRBD a thinpool because we want to snapshot t
 
 Set in /etc/lvm/lvm.conf:
 
-    filter = [ "r|/dev/mapper/testvg-CachedRawDRBDPV_corig|" ]
+    filter = [ "r|/dev/mapper/dev/mapper/VG1-cachedLV_corig|" ]
     
     /etc/init.d/lvm2 restart
     vgck
+    
+Create PV on cachedLV:
 
     pvcreate /dev/VG1/cachedLV
         Physical volume "/dev/VG1/cachedLV" successfully created
@@ -295,6 +300,8 @@ Set in /etc/lvm/lvm.conf:
         Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
         Physical volume "/dev/VG1/cachedLV" successfully created
         Volume group "DRBDVG" successfully created
+        
+Create a thinpool on top of that:
 
     lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
         Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
@@ -310,6 +317,8 @@ Set in /etc/lvm/lvm.conf:
         Do you really want to convert DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta? [y/n]: y
         Logical volume "lvol0" created
         Converted DRBDVG/cachedDRBDthinpool to thin pool.
+        
+Config DRBD config file:
   
     touch /etc/drbd.d/r0.res
 
@@ -341,20 +350,27 @@ Set in /etc/lvm/lvm.conf:
       }
     }
     
+Create DRBD meta datablock
+    
     drbdadm create-md r0
     initializing activity log
     NOT initializing bitmap
     Writing meta data...
     New drbd meta data block successfully created.
-    
+
+Make primary
+
     drbdadm -- --overwrite-data-of-peer primary r0
     drbdadm up r0
+    
+**IGNORE FOLLOWING ERROR**
+    
     /etc/drbd.d/r0.res:1: in resource r0:
         Missing section 'on <PEER> { ... }'.
     Device '0' is configured!
     Command 'drbdmeta 0 v08 /dev/mapper/DRBDVG-DRBDLV1 internal apply-al' terminated with exit code 20
     
-**IGNORE ERROR**
+Created stacked
 
     service drbd restart
     drbdadm create-md --stacked r0-U drbdadm up --stacked r0-U drbdadm primary --stacked r0-U
@@ -363,6 +379,8 @@ Set in /etc/lvm/lvm.conf:
         Writing meta data...
         New drbd meta data block successfully created.
         'drbdadm' not defined in your config (for this host).
+        
+Check
     
     cat /proc/drbd
     version: 8.4.5 (api:1/proto:86-101)
