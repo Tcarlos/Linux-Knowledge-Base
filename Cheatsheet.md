@@ -400,6 +400,54 @@ Set filter in /etc/lvm/lvm.conf
      
     /etc/init.d/lvm2 restart
     
+Create VPS thinpool on top of DRBD device
+
+    pvcreate /dev/drbd10
+    vgcreate DRBDVG2 /dev/drbd10
+    pvscan
+
+check how much space we have
+
+    vgdisplay
+    
+    VG Name               DRBDVG2
+    System ID             
+    Format                lvm2
+    Metadata Areas        1
+    Metadata Sequence No  1
+    VG Access             read/write
+    VG Status             resizable
+    MAX LV                0
+    Cur LV                0
+    Open LV               0
+    Max PV                0
+    Cur PV                1
+    Act PV                1
+    VG Size               1020.00 MiB
+    PE Size               4.00 MiB
+    Total PE              255
+    Alloc PE / Size       0 / 0   
+    Free  PE / Size       255 / 1020.00 MiB
+    VG UUID               1jh8ux-srXk-Vp0e-ENvW-0C11-Ow0E-zC5ecH
+
+Substract one PE for the pools creation. What have left will be devided. And then create a thinpool with that size. Use 50% of the space for it:
+
+    lvcreate -n VPSthinpool -L 125 DRBDVG2
+        Rounding up size to full physical extent 128.00 MiB
+        Logical volume "VPSthinpool" created
+    lvcreate -n VPSthinpool_meta -L 13 DRBDVG2
+        Rounding up size to full physical extent 16.00 MiB
+        Logical volume "VPSthinpool_meta" created
+    lvconvert --type thin-pool --poolmetadata DRBDVG2/VPSthinpool_meta DRBDVG2/VPSthinpool
+    WARNING: Converting logical volume DRBDVG2/VPSthinpool and DRBDVG2/VPSthinpool_meta to pool's data and metadata volumes.
+    THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
+    Do you really want to convert DRBDVG2/VPSthinpool and DRBDVG2/VPSthinpool_meta? [y/n]: y
+        Logical volume "lvol0" created
+        Converted DRBDVG2/VPSthinpool to thin pool
+
+
+TEST if metadata and datalv really can grow if needed!!
+    
 **Quick notes**
 
 while at work and trying to continue with DRBD, I stumbled upon a missing /dev/drbd10 device. DRBD10 is being mentioned in the configuration so I got a clue.
