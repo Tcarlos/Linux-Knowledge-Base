@@ -351,20 +351,21 @@ Config DRBD config file:
         meta-disk internal;
       }
     }
+
+Doublecheck that the 2nd line corresponds with uname -n!
     
 Create DRBD meta datablock
-    
+
     drbdadm create-md r0
     initializing activity log
     NOT initializing bitmap
     Writing meta data...
     New drbd meta data block successfully created.
 
-Make primary
+To enable a stacked resource, you first enable its lower-level resource and promote it:
 
-    drbdadm -- --overwrite-data-of-peer primary r0
     drbdadm up r0
-    
+
 **IGNORE FOLLOWING ERROR**
     
     /etc/drbd.d/r0.res:1: in resource r0:
@@ -372,18 +373,19 @@ Make primary
     Device '0' is configured!
     Command 'drbdmeta 0 v08 /dev/mapper/DRBDVG-DRBDLV1 internal apply-al' terminated with exit code 20
     
+Promote (set primary):
+
     drbdadm primary --force r0
     
-Created stacked
+create DRBD meta data on the stacked resources:
 
-    service drbd restart
-    drbdadm create-md --stacked r0-U drbdadm up --stacked r0-U drbdadm primary --stacked r0-U
-        initializing activity log
-        NOT initializing bitmap
-        Writing meta data...
-        New drbd meta data block successfully created.
-        'drbdadm' not defined in your config (for this host).
-        
+    drbdadm create-md --stacked r0-U
+    
+Then, you may enable the stacked resource:
+
+    drbdadm up --stacked r0-U 
+    drbdadm primary --force --stacked r0-U
+      
 Check
     
     cat /proc/drbd
