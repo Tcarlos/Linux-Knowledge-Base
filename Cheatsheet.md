@@ -318,6 +318,8 @@ Create a thinpool on top of that:
         Logical volume "lvol0" created
         Converted DRBDVG/cachedDRBDthinpool to thin pool.
         
+lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
+        
 Config DRBD config file:
   
     touch /etc/drbd.d/r0.res
@@ -401,9 +403,20 @@ Set filter in /etc/lvm/lvm.conf
 while at work and trying to continue with DRBD, I stumbled upon a missing /dev/drbd10 device. DRBD10 is being mentioned in the configuration so I got a clue.
 And here are helpful links:
 
-    https://drbd.linbit.com/users-guide/s-three-nodes.html
+    https://drbd.linbit.com/users-guide/s-three-nodes.html <----------------
 
-    https://www.howtoforge.com/drbd-8.3-third-node-replication-with-debian-etch 
+    https://www.howtoforge.com/drbd-8.3-third-node-replication-with-debian-etch
+    
+    http://www.gossamer-threads.com/lists/drbd/users/26154
+    
+    
+
+in the online examples, drbd10 seems to be connected to an actual disk. Since /dev/bulldisk doenst exist, I'll try with a new device.
+
+Made a new device by creating a new LV on VG DRBDVG and creating a PV on top of it.
+
+    lvcreate -n DRBDdisk -L 2G DRBDVG
+    pvcreate /dev/DRBDVG/DRBDdisk
 
 
 
