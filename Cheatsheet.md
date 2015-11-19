@@ -446,19 +446,7 @@ Substract one PE for the pools creation. What have left will be devided. And the
         Converted DRBDVG2/VPSthinpool to thin pool
 
 
-TEST if metadata and datalv really can grow if needed!!
-    
-**Quick notes**
 
-while at work and trying to continue with DRBD, I stumbled upon a missing /dev/drbd10 device. DRBD10 is being mentioned in the configuration so I got a clue.
-And here are helpful links:
-
-    https://drbd.linbit.com/users-guide/s-three-nodes.html <----------------
-
-    https://www.howtoforge.com/drbd-8.3-third-node-replication-with-debian-etch
-    
-    http://www.gossamer-threads.com/lists/drbd/users/26154
-    
     
 
 in the online examples, drbd10 seems to be connected to an actual disk. Since /dev/bulldisk doenst exist, I'll try with a new device.
@@ -508,9 +496,10 @@ Do note however, that the new container has no problem. So it could be that the 
 
 - fix the bugs of lxc_client1 and lxc_client2 (HANDLED, PROBABLY OSBOLETE ERROR)
 - complete snapshot cheatsheet section
-- include a couple of DBRD sections
+- include a couple of DBRD sections [DONE]
 - make restore snapshot of lxc thinpool containers work OR: RUN TESTCASE 3: include DRBD in the advanced LXC setup with thinpools and snapshots!
 - https://gitlab.rimotecloud.com/tmarinus/mainline-rve/blob/GL1/docs/install.md implement Richards LXC config section1
+- TEST if metadata and datalv really can grow if needed!!
 
 blockdevice explanation
 Here we try to explain the increddible complex partitioning/RAID/DRBD/LVM cahe thinpool stuff. Dont do this, it will be explained step by step. but its a good reference for explanation.
