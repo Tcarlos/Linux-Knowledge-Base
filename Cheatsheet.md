@@ -445,16 +445,29 @@ Substract one PE for the pools creation. What have left will be devided. And the
         Logical volume "lvol0" created
         Converted DRBDVG2/VPSthinpool to thin pool
 
+lvresize DRBDVG2/VPSthinpool -L +50M
+  Rounding size to boundary between physical extents: 52.00 MiB
+  Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 128.00 MiB (32 extents) to 180.00 MiB (45 extents).
+  Logical volume VPSthinpool successfully resized
+
+drbdadm -- --assume-peer-has-space resize r0 drbdadm -S -- --assume-peer-has-space resize r0-U
+
+pvresize /dev/drbd10
+
+lvextend -L +50M DRBDVG2/VPSthinpool 
+  Rounding size to boundary between physical extents: 52.00 MiB
+  Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 180.00 MiB (45 extents) to 232.00 MiB (58 extents).
+  Logical volume VPSthinpool successfully resized
+root@livenode1:/home/office# drbdadm -- --assume-peer-has-space resize r0
+root@livenode1:/home/office# drbdadm -S -- --assume-peer-has-space resize r0-U
+root@livenode1:/home/office# pvresize /dev/drbd10
+  Physical volume "/dev/drbd10" changed
+  1 physical volume(s) resized / 0 physical volume(s) not resized
 
 
-    
 
-in the online examples, drbd10 seems to be connected to an actual disk. Since /dev/bulldisk doenst exist, I'll try with a new device.
 
-Made a new device by creating a new LV on VG DRBDVG and creating a PV on top of it.
 
-    lvcreate -n DRBDdisk -L 2G DRBDVG
-    pvcreate /dev/DRBDVG/DRBDdisk
 
 
 
