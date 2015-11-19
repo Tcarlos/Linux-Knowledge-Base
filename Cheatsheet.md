@@ -370,6 +370,8 @@ Make primary
     Device '0' is configured!
     Command 'drbdmeta 0 v08 /dev/mapper/DRBDVG-DRBDLV1 internal apply-al' terminated with exit code 20
     
+    drbdadm primary --force r0
+    
 Created stacked
 
     service drbd restart
@@ -387,6 +389,21 @@ Check
     srcversion: 82483CBF1A7AFF700CBEEC5
     0: cs:StandAlone ro:Primary/Unknown ds:UpToDate/DUnknown   r----s
     ns:0 nr:0 dw:40 dr:1592 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:1048508
+
+Set filter in /etc/lvm/lvm.conf
+
+     filter = [ "r|/dev/mapper/VG1-cachedLV_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|", "r|/dev/drbd0|"]
+     
+    /etc/init.d/lvm2 restart
+    
+**Quick notes**
+
+while at work and trying to continue with DRBD, I stumbled upon a missing /dev/drbd10 device. DRBD10 is being mentioned in the configuration so I got a clue.
+And here are helpful links:
+
+    https://drbd.linbit.com/users-guide/s-three-nodes.html
+
+    https://www.howtoforge.com/drbd-8.3-third-node-replication-with-debian-etch 
 
 
 
