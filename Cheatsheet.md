@@ -535,3 +535,8 @@ Lets call the HDDs /dev/sda and /dev/sdb and the SSDs /dev/sdc/ and /dev/sdd
 12. On this VG we will create two LV's: a metadata and data partition. Together they form a thinpool that will be used for the creation of LXC LV's (for the containers)
 
 **Notes:** we cant cache a thinpool so we first had to create a cached LV and then base a thinpool on top of that. We also needed under the DRBD a thinpool because we want to snapshot the DRBD. On ttop of the DRBD we need a thinpool so we can snapshot the LXC lvs. We dont want thinpool for our most important partitions because of possible filling of thinpool and the becomming unusable of the lvs in thath case.
+
+#9 Online Resources
+
+https://puphpet.com/
+stackoverflow.com
