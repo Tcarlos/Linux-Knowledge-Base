@@ -252,6 +252,8 @@ Why DRBD: We also needed under the DRBD a thinpool because we want to snapshot t
 
 ### 6.1 Setup 
     
+    lvcreate -n cachedLV -L 10G /dev/VG1
+    
     lvs
     
     LV       VG   Attr       LSize   Pool Origin Data%  Meta%
