@@ -465,6 +465,10 @@ root@livenode1:/home/office# drbdadm -S -- --assume-peer-has-space resize r0-U
 root@livenode1:/home/office# pvresize /dev/drbd10
   Physical volume "/dev/drbd10" changed
   1 physical volume(s) resized / 0 physical volume(s) not resized
+  
+Create container(s) in VPSthinpool on DRBDVG2
+
+    lxc-create -t download -n my-container -B lvm --vgname DRBDVG2 --thinpool VPSthinPool --fssize=500M
 
 
 
