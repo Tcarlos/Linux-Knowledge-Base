@@ -1,7 +1,8 @@
 # Table of Contents
 
     1. TESTCASE1: test the process of creating and restoring snapshots
-    2. 
+    2. TESTCASE2: Install an LXC thinpool on top of an LV and cache the LV on a different volume
+    3. TESTCASE3: Setup a system for LXC containers that works with thinpools on top of a cached DRBD device in order to make various kinds of snapshots and have various resize functionalities
 
 
 
@@ -169,4 +170,17 @@ optional if LV status is somehow now available (visible via lvdisplay):
     vgchange -a y
 
 
-# TESTCASE 3: Setup a system for LXC containers that works with thinpools on top of a cached DRBD device in order to make various kinds of snapshots and have various resize functionalities
+# TESTCASE 3: Setup a system with LXC containers that works with thinpools on top of a cached DRBD device in order to make various kinds of snapshots and have various resize functionalities
+
+Now that we know how to create LXC containers inside a thinpool, know how to cache a logical volume and know how to make snapshots, we can include a DRBD blockdevice in the picture to get the snapshots and resizing functions we want.
+
+ASCII diagram
+
+
+
+Why this setup
+
+    
+- we originally wanted to cache a thinpool so that we can cache the LXC containers but unfortunately it's not possible to cache thinpools so instead of that we cache the LV named CACHEDLV that's under it, so effectively we're 'caching' the thinpools by caching it's parent LV.
+- we want to snapshot the DRBD blockdevice so that we can create a snapshot of all LXC containers on the DRBDD in one snapshot but unfortunately it's not possible to snapshot a DRBD so instead of that we can make a snapshot of the parent  thinpool that's under it, effectively 'snapshotting' the blockdevice that houses all the LXC containers. 
+- Besides backing up all LXC containers at once we also want to snapshot the individual LXC clients so on top of the DRBD so we will create lxc containers inside a thinpool so we can snapshot the individual LXC lvs. Also we'll benefit from the resizing capabilities of thin volumes. Also we can resize this thinpool by resizing it's parent VG named DRBDVG2
