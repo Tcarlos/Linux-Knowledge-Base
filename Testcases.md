@@ -320,3 +320,188 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
           └─VG1-cachedlv      252:3    0  9.3G  0 lvm   
     sr0                        11:0    1 1024M  0 rom 
 
+Set in /etc/lvm/lvm.conf:
+
+filter = [ "r|/dev/mapper/dev/mapper/VG1-cachedLV_corig|" ]
+
+/etc/init.d/lvm2 restart
+vgck
+
+**Create PV on cachedLV:**
+
+pvcreate /dev/VG1/cachedLV
+    Physical volume "/dev/VG1/cachedLV" successfully created
+
+vgcreate DRBDVG /dev/VG1/cachedLV
+    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+    Physical volume "/dev/VG1/cachedLV" successfully created
+    Volume group "DRBDVG" successfully created
+
+**Create a thinpool on top of that**
+
+    lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
+        Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+    Logical volume "cachedDRBDthinpool" created
+
+    lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
+        Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+    Logical volume "cachedDRBD_thin_meta" created
+    lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
+        Found duplicate PV ykuH1ZISKj3uonD2Pw9R5yFwaH76yYiN: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        WARNING: Converting logical volume DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta to pool's data and metadata volumes.
+        THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
+        Do you really want to convert DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta? [y/n]: y
+        Logical volume "lvol0" created
+        Converted DRBDVG/cachedDRBDthinpool to thin pool.
+
+    lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
+
+Config DRBD config file:
+
+    touch /etc/drbd.d/r0.res
+
+    resource r0 {
+     on livenode5 {
+       device /dev/drbd0;
+       disk /dev/mapper/DRBDVG-DRBDLV1;
+       address 127.0.0.1:7789;
+       meta-disk internal;
+        }
+    }
+
+    resource r0-U {
+      net {
+        protocol A;
+      }
+
+      stacked-on-top-of r0 {
+        device /dev/drbd10;
+        address 127.0.0.1:7791;
+       }
+
+    on bullshit {
+        device /dev/drbd10;
+        disk /dev/bulldisk;
+        address 127.0.0.1:7794;
+        meta-disk internal;
+        }
+    }
+
+Doublecheck that the 2nd line corresponds with uname -n!
+
+**Create DRBD meta datablock**
+
+    drbdadm create-md r0
+
+    initializing activity log
+    NOT initializing bitmap
+    Writing meta data...
+    New drbd meta data block successfully created.
+
+To enable a stacked resource, you first enable its lower-level resource and promote it:
+
+    drbdadm up r0
+
+**IGNORE FOLLOWING ERROR**
+
+    /etc/drbd.d/r0.res:1: in resource r0:
+        Missing section 'on <PEER> { ... }'.
+    Device '0' is configured!
+    Command 'drbdmeta 0 v08 /dev/mapper/DRBDVG-DRBDLV1 internal apply-al' terminated with exit code 20
+
+**Promote (set primary):**
+
+    drbdadm primary --force r0
+
+**Create DRBD meta data on the stacked resources**
+
+    drbdadm create-md --stacked r0-U
+
+**Then, you may enable the stacked resource:**
+
+    drbdadm up --stacked r0-U 
+    drbdadm primary --force --stacked r0-U
+
+**Check**
+
+    cat /proc/drbd
+    version: 8.4.5 (api:1/proto:86-101)
+    srcversion: 82483CBF1A7AFF700CBEEC5
+    0: cs:StandAlone ro:Primary/Unknown ds:UpToDate/DUnknown   r----s
+    ns:0 nr:0 dw:40 dr:1592 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:1048508
+
+**Set filter in /etc/lvm/lvm.conf**
+
+    filter = [ "r|/dev/mapper/VG1-cachedLV_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|", "r|/dev/drbd0|"]
+
+    /etc/init.d/lvm2 restart
+
+**Create VPS thinpool on top of DRBD device**
+
+    pvcreate /dev/drbd10
+    vgcreate DRBDVG2 /dev/drbd10
+    pvscan
+
+**Check how much space we have**
+
+    vgdisplay
+
+    VG Name               DRBDVG2
+    System ID             
+    Format                lvm2
+    Metadata Areas        1
+    Metadata Sequence No  1
+    VG Access             read/write
+    VG Status             resizable
+    MAX LV                0
+    Cur LV                0
+    Open LV               0
+    Max PV                0
+    Cur PV                1
+    Act PV                1
+    VG Size               1020.00 MiB
+    PE Size               4.00 MiB
+    Total PE              255
+    Alloc PE / Size       0 / 0   
+    Free  PE / Size       255 / 1020.00 MiB
+    VG UUID               1jh8ux-srXk-Vp0e-ENvW-0C11-Ow0E-zC5ecH
+
+Substract one PE for the pools creation. What have left will be devided. And then create a thinpool with that size. Use 50% of the space for it:
+
+    lvcreate -n VPSthinpool -L 125 DRBDVG2
+        Rounding up size to full physical extent 128.00 MiB
+        Logical volume "VPSthinpool" created
+    lvcreate -n VPSthinpool_meta -L 13 DRBDVG2
+        Rounding up size to full physical extent 16.00 MiB
+        Logical volume "VPSthinpool_meta" created
+    lvconvert --type thin-pool --poolmetadata DRBDVG2/VPSthinpool_meta DRBDVG2/VPSthinpool
+    WARNING: Converting logical volume DRBDVG2/VPSthinpool and DRBDVG2/VPSthinpool_meta to pool's data and metadata volumes.
+    THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
+    Do you really want to convert DRBDVG2/VPSthinpool and DRBDVG2/VPSthinpool_meta? [y/n]: y
+        Logical volume "lvol0" created
+        Converted DRBDVG2/VPSthinpool to thin pool
+        
+**Test resizing**
+
+    lvresize DRBDVG2/VPSthinpool -L +50M Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 128.00 MiB (32 extents) to 180.00 MiB (45 extents). Logical volume VPSthinpool successfully resized
+
+    drbdadm -- --assume-peer-has-space resize r0 drbdadm -S -- --assume-peer-has-space resize r0-U
+
+    pvresize /dev/drbd10
+
+    lvextend -L +50M DRBDVG2/VPSthinpool Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 180.00 MiB (45 extents) to 232.00 MiB (58 extents). Logical volume         VPSthinpool successfully resized 
+    
+   drbdadm -- --assume-peer-has-space resize r0 
+    
+   drbdadm -S -- --assume-peer-has-space resize r0-U 
+    
+   pvresize /dev/drbd10 
+   Physical volume "/dev/drbd10" changed 1 physical volume(s) resized / 0 physical volume(s) not resized
+
+**Create container(s) in VPSthinpool on DRBDVG2**
+
+    lxc-create -t download -n my-container -B lvm --vgname DRBDVG2 --thinpool VPSthinPool --fssize=500M
