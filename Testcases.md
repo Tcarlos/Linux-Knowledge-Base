@@ -329,17 +329,17 @@ vgck
 
 **Create PV on cachedLV:**
 
-pvcreate /dev/VG1/cachedLV
-    Physical volume "/dev/VG1/cachedLV" successfully created
+    pvcreate /dev/VG1/cachedLV
+        Physical volume "/dev/VG1/cachedLV" successfully created
 
-vgcreate DRBDVG /dev/VG1/cachedLV
-    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
-    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
-    Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-    Physical volume "/dev/VG1/cachedLV" successfully created
-    Volume group "DRBDVG" successfully created
+    vgcreate DRBDVG /dev/VG1/cachedLV
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+        Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+        Physical volume "/dev/VG1/cachedLV" successfully created
+            Volume group "DRBDVG" successfully created
 
 **Create a thinpool on top of that**
 
@@ -495,12 +495,12 @@ Substract one PE for the pools creation. What have left will be devided. And the
 
     lvextend -L +50M DRBDVG2/VPSthinpool Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 180.00 MiB (45 extents) to 232.00 MiB (58 extents). Logical volume         VPSthinpool successfully resized 
     
-   drbdadm -- --assume-peer-has-space resize r0 
+        drbdadm -- --assume-peer-has-space resize r0 
     
-   drbdadm -S -- --assume-peer-has-space resize r0-U 
+        drbdadm -S -- --assume-peer-has-space resize r0-U 
     
-   pvresize /dev/drbd10 
-   Physical volume "/dev/drbd10" changed 1 physical volume(s) resized / 0 physical volume(s) not resized
+        pvresize /dev/drbd10 
+            Physical volume "/dev/drbd10" changed 1 physical volume(s) resized / 0 physical volume(s) not resized
 
 **Create container(s) in VPSthinpool on DRBDVG2**
 
