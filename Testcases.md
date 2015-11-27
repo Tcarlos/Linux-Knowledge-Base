@@ -505,3 +505,27 @@ Substract one PE for the pools creation. What have left will be devided. And the
 **Create container(s) in VPSthinpool on DRBDVG2**
 
     lxc-create -t download -n my-container -B lvm --vgname DRBDVG2 --thinpool VPSthinPool --fssize=500M
+    
+**NOTES**
+
+Breaking: all LVs load fine! It is just the DRBD that doesnt load at boot, with the consequence of not loading the VPS thinpool and its LXC clients
+
+the 2 LV's in DRBDVG are
+
+DRBDThinpool (this LV is a thinpool)
+DRBDLV1 is a thin volume inside DRBD thin pool
+
+
+This has to be done to get it up and running again after reboot:
+
+drbdadm primary --force r0
+
+drbdadm up --stacked r0-U 
+
+drbdadm primary --force --stacked r0-U
+
+lxc-start -n my-container
+
+CONTAINER DOESNT LOAD AT BOOT. THEREFORE,
+
+Create a script that activates the DRBD device, followed by the lxc-start command of VPSthinpool containers!
