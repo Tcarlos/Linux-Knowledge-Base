@@ -536,3 +536,11 @@ the 2 LV's in DRBDVG are:
 CONTAINER DOESNT LOAD AT BOOT. THEREFORE,
 
 Create a script that activates the DRBD device, followed by the lxc-start command of VPSthinpool containers!
+
+** UPDATE **
+
+the new challenge is to snapshot the drbd before it syncs. 
+
+- what for drbd thing do i have (https://drbd.linbit.com/users-guide/s-three-nodes.html)
+- how to snapshot
+- how does synching occur
