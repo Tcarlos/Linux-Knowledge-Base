@@ -508,7 +508,7 @@ Substract one PE for the pools creation. What have left will be devided. And the
     
 **NOTES**
 
-discovered LV boots fine at reboot, it's just the DRBD that doesnt load at boot, with the consequence of not loading the VPS thinpool and its LXC clients
+discovered all LVs boot fine at reboot, it's just the DRBD that doesnt load at boot, with the consequence of not loading the VPS thinpool and its LXC clients
 discovered that only a few drbd commands are needed to get it all running again
 lxc containers dont start automatically at startup, wether in a DRBD device or not
 
@@ -569,6 +569,7 @@ If i want to know how to make manual snapshots (before synching) I need to analy
 - checksum based syncronization
 
 https://drbd.linbit.com/users-guide/s-configure-checksum-sync.html
+https://drbd.linbit.com/users-guide/s-configure-sync-rate.html
 
 #### Testing automatic snapshots
 
