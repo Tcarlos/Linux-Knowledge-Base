@@ -506,7 +506,7 @@ Substract one PE for the pools creation. What have left will be devided. And the
 
     lxc-create -t download -n my-container -B lvm --vgname DRBDVG2 --thinpool VPSthinPool --fssize=500M
     
-**NOTES**
+### Update nov 30th 
 
 discovered all LVs boot fine at reboot, it's just the DRBD that doesnt load at boot, with the consequence of not loading the VPS thinpool and its LXC clients
 discovered that only a few drbd commands are needed to get it all running again
