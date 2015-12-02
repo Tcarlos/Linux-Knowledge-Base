@@ -542,5 +542,35 @@ Create a script that activates the DRBD device, followed by the lxc-start comman
 the new challenge is to snapshot the drbd before it syncs. 
 
 - what for drbd thing do i have (https://drbd.linbit.com/users-guide/s-three-nodes.html)
-- how to snapshot
-- how does synching occur
+
+comparing the drbd setup of this testcase 3 with the above links seems to imply i have a two node setup.
+
+### Update December 2nd
+
+#### How to snapshot
+
+https://drbd.linbit.com/users-guide/s-lvm-snapshots.html
+
+    resource r0 {
+      handlers {
+        before-resync-target "/usr/lib/drbd/snapshot-resync-target-lvm.sh";
+        after-resync-target "/usr/lib/drbd/unsnapshot-resync-target-lvm.sh";
+        }
+    }
+
+If i want to know how to make manual snapshots (before synching) I need to analyze these scripts and/or use common sense combined with the knowledge when synching occurs.
+
+#### How does DRBD synching occur 
+
+3 types:
+
+- variable rate synchronization
+- fxied rate synchronization
+- checksum based syncronization
+
+https://drbd.linbit.com/users-guide/s-configure-checksum-sync.html
+
+#### Testing automatic snapshots
+
+#### Measuring when synching occurs
+
