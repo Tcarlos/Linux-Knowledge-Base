@@ -188,6 +188,11 @@ Now that we know how to create LXC containers inside a thinpool, know how to cac
 
 #### 4. Setup
 
+    sudo su
+    apt-get uddate && apt-get upgrade
+    screen
+
+
 #### 4.1 start
 
 At the start of this scenario, we have just installed Ubuntu Server 15.04, with 4 Logical Volumes on an HDD RAID, and 1 unused SDD RAID as of yet. See testcase #1 in this article if you need more info on the Ubuntu setup. Anyway, start looks like this:
