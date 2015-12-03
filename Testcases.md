@@ -564,6 +564,15 @@ Also in the global common file, make the following entries in the disk section:
 
 #### Testing automatic snapshots
 
+The snapshot-resync-target-lvm.sh script creates an LVM snapshot for any volume the resource contains **immediately before** synchronization kicks off. In case the script fails, the synchronization does not commence
+
+^^ So this script will do his work every time the DRBD syncrhonizes, **which is set by resync-rate 33M**
+
+Once synchronization completes, the unsnapshot-resync-target-lvm.sh script removes the snapshot, which is then no longer needed. In case unsnapshotting fails, the snapshot continues to linger around.
+
+So a snapshot will remain if unsnapshot-resync-target-lvm.sh fails to remove it. 
+So for this test we will hack above script in such a way it fails to remove the snapshot.
+
 #### Measuring when synching occurs
 
 ### Measuring I/O
