@@ -1,3 +1,12 @@
+Still have to figure out a way to test automaking snapshots
+
+And in the light of high demand of an operational system, ill try working with manual snapshots
+
+Analyzing the script, the lvcreate command is the following to make a DRBD snapshot:
+
+
+
+
 
 ### Updates 3 dec 
 
