@@ -325,12 +325,14 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
           └─VG1-cachedlv      252:3    0  9.3G  0 lvm   
     sr0                        11:0    1 1024M  0 rom 
 
-Set in /etc/lvm/lvm.conf:
+#### 4.3 Create the DRBD device
 
-filter = [ "r|/dev/mapper/dev/mapper/VG1-cachedLV_corig|" ]
+**Set in /etc/lvm/lvm.conf:**
 
-/etc/init.d/lvm2 restart
-vgck
+    filter = [ "r|/dev/mapper/dev/mapper/VG1-cachedLV_corig|" ]
+
+    /etc/init.d/lvm2 restart
+    vgck
 
 **Create PV on cachedLV:**
 
@@ -365,7 +367,7 @@ vgck
 
     lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
 
-Config DRBD config file:
+**Config DRBD config file**
 
     touch /etc/drbd.d/r0.res
 
@@ -511,50 +513,31 @@ Substract one PE for the pools creation. What have left will be devided. And the
 
     lxc-create -t download -n my-container -B lvm --vgname DRBDVG2 --thinpool VPSthinPool --fssize=500M
     
-### Update nov 30th 
+    
+#### 4.4 DRBD configuration
+    
+**commands right after reboot**
 
-discovered all LVs boot fine at reboot, it's just the DRBD that doesnt load at boot, with the consequence of not loading the VPS thinpool and its LXC clients
-discovered that only a few drbd commands are needed to get it all running again
-lxc containers dont start automatically at startup, wether in a DRBD device or not
-
-conclusion: 
-
-- Create a script that activates the DRBD device, followed by the lxc-start command of VPSthinpool containers!
-- We can continue working
-
-
-the 2 LV's in DRBDVG are:
-
-- DRBDThinpool (this LV is a thinpool)
-- DRBDLV1 is a thin volume inside DRBD thin pool
-
-**This has to be done to get it up and running again after reboot:**
+Right after reboot, the DRBVD blockdevice is not yet up and running. With the following three commands we get it back:
 
     drbdadm primary --force r0
 
     drbdadm up --stacked r0-U 
 
     drbdadm primary --force --stacked r0-U
+    
+Followed by starting the LXC client(s):
 
     lxc-start -n my-container
+    
+The mentioned commands should be put in a script so we have automation.
 
-CONTAINER DOESNT LOAD AT BOOT. THEREFORE,
 
-Create a script that activates the DRBD device, followed by the lxc-start command of VPSthinpool containers!
+**set automatic LVM snapshots on:**
 
-** UPDATE **
+Open the global common file and enter the parameters below:
 
-the new challenge is to snapshot the drbd before it syncs. 
-
-- what for drbd thing do i have (https://drbd.linbit.com/users-guide/s-three-nodes.html)
-
-comparing the drbd setup of this testcase 3 with the above links seems to imply i have a two node setup.
-
-### Update December 2nd
-
-#### How to snapshot
-
-https://drbd.linbit.com/users-guide/s-lvm-snapshots.html
+    nano /etc/drbd.d/global_common.conf
 
     resource r0 {
       handlers {
@@ -562,31 +545,22 @@ https://drbd.linbit.com/users-guide/s-lvm-snapshots.html
         after-resync-target "/usr/lib/drbd/unsnapshot-resync-target-lvm.sh";
         }
     }
+    
+Manual snapshotting will follow.
+    
+**set fixed synchronization rate:**
 
-If i want to know how to make manual snapshots (before synching) I need to analyze these scripts and/or use common sense combined with the knowledge when synching occurs.
+Also in the global common file, make the following entries in the disk section:
 
-#### How does DRBD synching occur 
+    disk {
 
-3 types:
-
-- variable rate synchronization
-- fxied rate synchronization
-- checksum based syncronization
-
-https://drbd.linbit.com/users-guide/s-configure-checksum-sync.html
-https://drbd.linbit.com/users-guide/s-configure-sync-rate.html
-
-Choosing the more simple and more absolute fixed rate sycnhrhonizing for now
-
-#### Setting fixed rate synchronization
-
-In fixed-rate synchronization, the amount of data shipped to the synchronizing peer per second (the synchronization rate) has a configurable, static upper limit. Based on this limit, you may estimate the expected sync time based on the following simple formula:
-
-    Tsync = D/R
-
-tsync is the expected sync time. D is the amount of data to be synchronized, which you are unlikely to have any influence over (this is the amount of data that was modified by your application while the replication link was broken). R is the rate of synchronization, which is configurable — bounded by the throughput limitations of the replication network and I/O subsystem.
-
-**IMPORTANT** It does not make sense to set a synchronization rate that is higher than the maximum write throughput on your secondary node. You must not expect your secondary node to miraculously be able to write faster than its I/O subsystem allows, just because it happens to be the target of an ongoing device synchronization.
+                c-plan-ahead 0;
+                resync-rate 33M;
+                # size on-io-error fencing disk-barrier disk-flushes
+                # disk-drain md-flushes resync-rate resync-after al-extents
+                # c-plan-ahead c-delay-target c-fill-target c-max-rate
+                # c-min-rate disk-timeout
+            }
 
 #### Testing automatic snapshots
 
