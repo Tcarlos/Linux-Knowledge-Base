@@ -1,12 +1,11 @@
 # Table of Contents
 
-    1. TESTCASE1: test the process of creating and restoring snapshots
-    2. TESTCASE2: Install an LXC thinpool on top of an LV and cache the LV on a different volume
-    3. TESTCASE3: Setup a system for LXC containers that works with thinpools on top of a cached DRBD device in order to make various kinds of snapshots and have various resize functionalities
+1. TESTCASE 1: test the process of creating and restoring snapshots
+2. TESTCASE 2: Install an LXC thinpool on top of an LV and cache the LV on a different volume
+3. TESTCASE 3: Setup a system for LXC containers that works with thinpools on top of a cached DRBD device in order to make various kinds of snapshots and have various resize functionalities
 
-
-
-# TESTCASE1: test the process of creating and restoring snapshots
+# TESTCASE 1
+## Test the process of creating and restoring snapshots
 
 Create an LV and confirm creation
 
@@ -25,7 +24,6 @@ Make some files on it and confirm presence of files
     cd /data && touch moo foo shoo
     ls -la
     
-
 Create a 1GB snapshot of LV data and confirm
 
     lvcreate -L 1G -s -n data_snap /dev/VG1/data
@@ -58,7 +56,8 @@ Confirm data LV has been restored to the situation that has only 3 files
     mount /dev/VG1/data /data
     ls -la /data
 
-# TESTCASE2: Install an LXC thinpool on top of an LV and cache the LV on a different volume
+# TESTCASE 2
+## Install an LXC thinpool on top of an LV and cache the LV on a different volume
 
     lvcreate -L 100M -n cachemeta VG1 /dev/md1
         Logical volume "cachemeta" created
@@ -170,7 +169,8 @@ optional if LV status is somehow now available (visible via lvdisplay):
     vgchange -a y
 
 
-# TESTCASE 3: Setup a system with LXC containers that works with thinpools on top of a cached DRBD device in order to make various kinds of snapshots and have various resize functionalities
+# TESTCASE 3
+## Setup a system with LXC containers that works with thinpools on top of a cached DRBD device in order to make various kinds of snapshots and have various resize functionalities
 
 ### 1. Description
 
@@ -180,18 +180,16 @@ Now that we know how to create LXC containers inside a thinpool, know how to cac
 
 ### 3. Why this setup
 
-    
-- we originally wanted to cache a thinpool so that we can cache the LXC containers but unfortunately it's not possible to cache thinpools so instead of that we cache the LV named CACHEDLV that's under it, so effectively we're 'caching' the thinpools by caching it's parent LV.
-- we want to snapshot the DRBD blockdevice so that we can create a snapshot of all LXC containers on the DRBDD in one snapshot but unfortunately it's not possible to snapshot a DRBD so instead of that we can make a snapshot of the parent  thinpool that's under it, effectively 'snapshotting' the blockdevice that houses all the LXC containers. 
+- We originally wanted to cache a thinpool so that we can cache the LXC containers but unfortunately it's not possible to cache thinpools so instead of that we cache the LV named CACHEDLV that's under it, so effectively we're 'caching' the thinpools by caching it's parent LV.
+- We want to snapshot the DRBD blockdevice so that we can create a snapshot of all LXC containers on the DRBDD in one snapshot but unfortunately it's not possible to snapshot a DRBD so instead of that we can make a snapshot of the parent  thinpool that's under it, effectively 'snapshotting' the blockdevice that houses all the LXC containers. 
 - Besides backing up all LXC containers at once we also want to snapshot the individual LXC clients so on top of the DRBD so we will create lxc containers inside a thinpool so we can snapshot the individual LXC lvs. Also we'll benefit from the resizing capabilities of thin volumes. Also we can resize this thinpool by resizing it's parent VG named DRBDVG2
 - DRBD has advantages, namely ...
 
-#### 4. Setup
+### 4. Setup
 
     sudo su
     apt-get uddate && apt-get upgrade
     screen
-
 
 #### 4.1 start
 
@@ -593,7 +591,7 @@ tsync is the expected sync time. D is the amount of data to be synchronized, whi
     
 the PV on drbd10 which hosts DRBDVG2, which hosts VPSthinpool and the LXC thin volume clients, has 1020MB size and 360M free, so the ammount of data is 660M
 
-**Check howmuch is the rate of synchronization as was set in the global common file**
+**Check how much is the rate of synchronization as was set in the global common file**
 
     cat /etc/drbd.d/global_common.conf |grep resync
     
