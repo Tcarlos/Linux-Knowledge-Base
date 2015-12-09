@@ -353,7 +353,8 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
 
 **Create an LV as a backing device for DRBD
 
-    lvcreate -L 1G -s -n DRBDLV1_snap /dev/DRBDVG/DRBDLV1
+    lvcreate -L 10GB -n DRBDLV1 DRBDVG
+
 
 **Config DRBD config file**
 
@@ -500,6 +501,24 @@ Substract one PE for the pools creation. What have left will be devided. And the
 **Create container(s) in VPSthinpool on DRBDVG2**
 
     lxc-create -t download -n my-container -B lvm --vgname DRBDVG2 --thinpool VPSthinPool --fssize=500M
+    
+    
+#### 4.4 Test snapshot functionality
+
+**Snapshotting the LV right under the DRBD device**
+
+    lvcreate -L 1G -s -n DRBDLV1_snap2 /dev/DRBDVG/DRBDLV1
+
+
+**Snapshotting the individual LXC clients
+
+    lvcreate -L 500M -s -n my-container_snap /dev/DRBDVG2/my-container
+
+
+**removing snapshot
+
+lvremove /dev/DRBDVG/DRBDLV1_snap /dev/DRBDVG/DRBDLV1
+
     
     
 #### 4.4 DRBD configuration
