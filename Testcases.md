@@ -191,6 +191,7 @@ Now that we know how to create LXC containers inside a thinpool, know how to cac
     sudo su
     apt-get uddate && apt-get upgrade
     screen
+    apt-get install lxc drbd-utils thin-provisioning-tools
 
 
 #### 4.1 start
@@ -329,29 +330,29 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
 
 **Set in /etc/lvm/lvm.conf:**
 
-    filter = [ "r|/dev/mapper/dev/mapper/VG1-cachedLV_corig|" ]
+    filter = [ "r|/dev/mapper/dev/mapper/VG1-cachedlv_corig|" ]
 
     /etc/init.d/lvm2 restart
     vgck
 
 **Create PV on cachedLV:**
 
-    pvcreate /dev/VG1/cachedLV
-        Physical volume "/dev/VG1/cachedLV" successfully created
+    pvcreate /dev/VG1/cachedlv
+        Physical volume "/dev/VG1/cachedlv" successfully created
         
 **Create VG on top of that
 
-    vgcreate DRBDVG /dev/VG1/cachedLV
+    vgcreate DRBDVG /dev/VG1/cachedlv
         Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
         Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
         Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
         Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
         Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
-        Physical volume "/dev/VG1/cachedLV" successfully created
+        Physical volume "/dev/VG1/cachedlv" successfully created
             Volume group "DRBDVG" successfully created
             
 
-**Create an LV as a backing device for DRBD
+**Create an LV as a backing device for DRBD**
 
     lvcreate -L 10GB -n DRBDLV1 DRBDVG
 
@@ -432,7 +433,7 @@ To enable a stacked resource, you first enable its lower-level resource and prom
 
 **Set filter in /etc/lvm/lvm.conf**
 
-    filter = [ "r|/dev/mapper/VG1-cachedLV_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|", "r|/dev/drbd0|"]
+    filter = [ "r|/dev/mapper/VG1-cachedlv_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|", "r|/dev/drbd0|"]
 
     /etc/init.d/lvm2 restart
 
@@ -481,44 +482,11 @@ Substract one PE for the pools creation. What have left will be devided. And the
         Logical volume "lvol0" created
         Converted DRBDVG2/VPSthinpool to thin pool
         
-**Test resizing**
 
-    lvresize DRBDVG2/VPSthinpool -L +50M Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 128.00 MiB (32 extents) to 180.00 MiB (45 extents). Logical volume VPSthinpool successfully resized
-
-    drbdadm -- --assume-peer-has-space resize r0 drbdadm -S -- --assume-peer-has-space resize r0-U
-
-    pvresize /dev/drbd10
-
-    lvextend -L +50M DRBDVG2/VPSthinpool Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 180.00 MiB (45 extents) to 232.00 MiB (58 extents). Logical volume         VPSthinpool successfully resized 
-    
-        drbdadm -- --assume-peer-has-space resize r0 
-    
-        drbdadm -S -- --assume-peer-has-space resize r0-U 
-    
-        pvresize /dev/drbd10 
-            Physical volume "/dev/drbd10" changed 1 physical volume(s) resized / 0 physical volume(s) not resized
 
 **Create container(s) in VPSthinpool on DRBDVG2**
 
     lxc-create -t download -n my-container -B lvm --vgname DRBDVG2 --thinpool VPSthinPool --fssize=500M
-    
-    
-#### 4.4 Test snapshot functionality
-
-**Snapshotting the LV right under the DRBD device**
-
-    lvcreate -L 1G -s -n DRBDLV1_snap2 /dev/DRBDVG/DRBDLV1
-
-
-**Snapshotting the individual LXC clients
-
-    lvcreate -L 500M -s -n my-container_snap /dev/DRBDVG2/my-container
-
-
-**removing snapshot
-
-lvremove /dev/DRBDVG/DRBDLV1_snap /dev/DRBDVG/DRBDLV1
-
     
     
 #### 4.4 DRBD configuration
@@ -537,84 +505,51 @@ Followed by starting the LXC client(s):
 
     lxc-start -n my-container
     
-The mentioned commands should be put in a script so we have automation.
-
-
-**set automatic LVM snapshots on:**
-
-Open the global common file and enter the parameters below:
-
-    nano /etc/drbd.d/global_common.conf
-
-    resource r0 {
-      handlers {
-        before-resync-target "/usr/lib/drbd/snapshot-resync-target-lvm.sh";
-        after-resync-target "/usr/lib/drbd/unsnapshot-resync-target-lvm.sh";
-        }
-    }
     
-Manual snapshotting will follow.
     
-**set fixed synchronization rate:**
+## 5. Testing 
 
-Also in the global common file, make the following entries in the disk section:
+#### 5.1 Test snapshot functionality
 
-    disk {
+This setup provides 2 snapshot features.
 
-                c-plan-ahead 0;
-                resync-rate 33M;
-                # size on-io-error fencing disk-barrier disk-flushes
-                # disk-drain md-flushes resync-rate resync-after al-extents
-                # c-plan-ahead c-delay-target c-fill-target c-max-rate
-                # c-min-rate disk-timeout
-            }
+**Snapshotting the LV right under the DRBD device**
 
-#### Testing automatic snapshots
+    lvcreate -L 1G -s -n DRBDLV1_snap2 /dev/DRBDVG/DRBDLV1
 
-The snapshot-resync-target-lvm.sh script creates an LVM snapshot for any volume the resource contains **immediately before** synchronization kicks off. In case the script fails, the synchronization does not commence
 
-^^ So this script will do his work every time the DRBD syncrhonizes, **which is set by resync-rate 33M**
+**Snapshotting the individual LXC clients
 
-Once synchronization completes, the unsnapshot-resync-target-lvm.sh script removes the snapshot, which is then no longer needed. In case unsnapshotting fails, the snapshot continues to linger around.
+    lvcreate -L 500M -s -n my-container_snap /dev/DRBDVG2/my-container
 
-So a snapshot will remain if unsnapshot-resync-target-lvm.sh fails to remove it. 
-So for this test we will hack above script in such a way it fails to remove the snapshot.
+**removing snapshot**
 
-#### Measuring when synching occurs
-
-In fixed-rate synchronization, the amount of data shipped to the synchronizing peer per second (the synchronization rate) has a configurable, static upper limit. Based on this limit, you may estimate the expected sync time based on the following simple formula:
-
-    Tsync = D/R
-
-tsync is the expected sync time. D is the amount of data to be synchronized, which you are unlikely to have any influence over (this is the amount of data that was modified by your application while the replication link was broken). R is the rate of synchronization, which is configurable — bounded by the throughput limitations of the replication network and I/O subsystem.
-
-**Check howmuch data is on the block device:**
-
-    pvs
+    lvremove /dev/DRBDVG/DRBDLV1_snap /dev/DRBDVG/DRBDLV1
     
-    PV                VG      Fmt  Attr PSize    PFree  
-    /dev/VG1/cachedlv DRBDVG  lvm2 a--     9.31g   3.43g
-    /dev/drbd10       DRBDVG2 lvm2 a--  1020.00m 360.00m
-    /dev/md0          VG1     lvm2 a--    19.98g   5.92g
-    /dev/md1          VG1     lvm2 a--     4.99g 916.00m
+**Automatic snapshots**
+
+#### 5.2 Resizing
+
+**Resizing the VPS thinpool with lvresize and lvextend commands**
+
+    lvresize DRBDVG2/VPSthinpool -L +50M 
+    Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 128.00 MiB (32 extents) to 180.00 MiB (45 extents). Logical volume VPSthinpool successfully resized
+
+    drbdadm -- --assume-peer-has-space resize r0 
     
-the PV on drbd10 which hosts DRBDVG2, which hosts VPSthinpool and the LXC thin volume clients, has 1020MB size and 360M free, so the ammount of data is 660M
+    drbdadm -S -- --assume-peer-has-space resize r0-U
 
-**Check howmuch is the rate of synchronization as was set in the global common file**
+    pvresize /dev/drbd10
 
-    cat /etc/drbd.d/global_common.conf |grep resync
+    lvextend -L +50M DRBDVG2/VPSthinpool Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 180.00 MiB (45 extents) to 232.00 MiB (58 extents). Logical volume         VPSthinpool successfully resized 
     
-    ...
-    resync-rate 33M;
-    ...
+        drbdadm -- --assume-peer-has-space resize r0 
     
-This shows the resync rate is 33M/sec
+        drbdadm -S -- --assume-peer-has-space resize r0-U 
+        
 
-So, the expected sync time is 660M/33M = 20 secs.
+**resizing lxc clients**
+    
+        pvresize /dev/drbd10 
 
-Now
-
-### Measuring I/O
-
-
-
+    
