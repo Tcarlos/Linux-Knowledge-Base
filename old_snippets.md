@@ -16,6 +16,39 @@
         Converted DRBDVG/cachedDRBDthinpool to thin pool.
 
     lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
+    
+    
+The mentioned commands should be put in a script so we have automation.
+
+
+**set automatic LVM snapshots on:**
+
+Open the global common file and enter the parameters below:
+
+    nano /etc/drbd.d/global_common.conf
+
+    resource r0 {
+      handlers {
+        before-resync-target "/usr/lib/drbd/snapshot-resync-target-lvm.sh";
+        after-resync-target "/usr/lib/drbd/unsnapshot-resync-target-lvm.sh";
+        }
+    }
+    
+Manual snapshotting will follow.
+    
+**set fixed synchronization rate:**
+
+Also in the global common file, make the following entries in the disk section:
+
+    disk {
+
+                c-plan-ahead 0;
+                resync-rate 33M;
+                # size on-io-error fencing disk-barrier disk-flushes
+                # disk-drain md-flushes resync-rate resync-after al-extents
+                # c-plan-ahead c-delay-target c-fill-target c-max-rate
+                # c-min-rate disk-timeout
+            }
 
 
 #### Testing automatic snapshots
