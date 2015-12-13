@@ -533,7 +533,8 @@ This setup provides 2 snapshot features.
 **Resizing the VPS thinpool with lvresize and lvextend commands**
 
     lvresize DRBDVG2/VPSthinpool -L +50M 
-    Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 128.00 MiB (32 extents) to 180.00 MiB (45 extents). Logical volume VPSthinpool successfully resized
+    Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 128.00 MiB (32 extents) to 180.00 MiB (45 extents). 
+    Logical volume VPSthinpool successfully resized
 
     drbdadm -- --assume-peer-has-space resize r0 
     
@@ -541,7 +542,8 @@ This setup provides 2 snapshot features.
 
     pvresize /dev/drbd10
 
-    lvextend -L +50M DRBDVG2/VPSthinpool Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 180.00 MiB (45 extents) to 232.00 MiB (58 extents). Logical volume         VPSthinpool successfully resized 
+    lvextend -L +50M DRBDVG2/VPSthinpool Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 180.00 MiB (45 extents) to 232.00 MiB (58 extents). 
+    Logical volume VPSthinpool successfully resized 
     
         drbdadm -- --assume-peer-has-space resize r0 
     
