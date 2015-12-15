@@ -1,16 +1,15 @@
-# TESTCASE 3: Setup a system with LXC containers that works with thinpools on top of a cached DRBD device in order to make various kinds of snapshots and have various resize functionalities
+# TESTCASE 3: Create an advanced system with LXC clients
 
 # Table of Contents
 
-    1. TESTCASE1: test the process of creating and restoring snapshots
+    1. Description
+    2. Why this setup
+    3. Setup
+    4. Testing
  
-
-
-
-
 # 1. Description
 
-Now that we know how to create LXC containers inside a thinpool, know how to cache a logical volume and know how to make snapshots, we can include a DRBD blockdevice in the picture to get the snapshots and resizing functions we want.
+This system with lxc clients have the lxc clients inside a thinpool, on top of a DRBD device, with the whole system cached, has many resize options and have 2 types of snapshots available.
 
 **ASCII Diagram:**
 
