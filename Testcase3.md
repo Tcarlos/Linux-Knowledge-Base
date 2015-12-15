@@ -354,17 +354,35 @@ Overprovisioning
     
 ### 4.1.3 Restoring Logical Volumes with Snapshots
 
+Just enter the the name of the snapshot and its path, and the linked LV that is to be restored will get restored.
+
+    lvconvert --merge /dev/DRBDVG2/lxc1_snap
+    lvconvert --merge /dev/DRBDVG/DRBDLV1_snap1
+
 ### 4.1.4 Removing snapshots**
+
+First, stop any running LXC clients:
+
+    lxc-stop -n lxc1
+    
+Then remove the snapshots with lvremove:
 
     lvremove /dev/DRBDVG/DRBDLV1_snap1 /dev/DRBDVG/DRBDLV1
     
 ### 4.1.5 Auto extending snapshots
+
+In /etc/lvm/lvm.conf
+
+    thin_pool_autoextend_threshold = 50
+    thin_pool_autoextend_percent = 10
     
 ### 4.1.6 Automatic snapshots with DRBD
 
+    https://drbd.linbit.com/users-guide/s-lvm-snapshots.html
+
 ## 4.2 Testing resizing of various volumes
 
-**Resizing the VPS thinpool with lvresize and lvextend commands**
+**Resizing the VPS thinpool with lvresize and lvextend commands and adjusting the PV size of DRBD device right with it.**
 
     lvresize DRBDVG2/VPSthinpool -L +50M 
     Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 128.00 MiB (32 extents) to 180.00 MiB (45 extents). 
