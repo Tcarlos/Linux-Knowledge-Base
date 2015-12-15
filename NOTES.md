@@ -1,6 +1,12 @@
 **NOTES DE 15th**
 
 
+[16:33]
+
+Couldnt create snapshots of a thin volume designated LV, but could do it with a normal LV. The LXC thin volume is snapshottable however.
+Review with Richard and/or see how to create a thin pool under the DRBD that is availbe for snapshots, if needed at all.
+
+
         LXC1        <--- VPS thinpool that is available for snapshots
 
         VPSthinpool <--- Thinpool for LXC clients (designated LV)
