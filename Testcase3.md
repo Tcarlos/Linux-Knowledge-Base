@@ -401,7 +401,7 @@ To see howmuch space is available use these commands for more info:
 Overprovisioning
 
 
-### 4.1.1 Snapshotting the LV right under the DRBD device**
+### 4.1.1 Snapshotting the LV right under the DRBD device
 
     lvcreate -L 1G -s -n DRBDLV1_snap1 /dev/DRBDVG/DRBDLV1
 
@@ -411,7 +411,7 @@ Overprovisioning
     
 ### 4.1.3 Restoring Logical Volumes with Snapshots
 
-Just enter the the name of the snapshot and its path, and the linked LV that is to be restored will get restored.
+Just enter the the name of the snapshot with its path, and the linked LV that is to be restored will get restored.
 
     lvconvert --merge /dev/DRBDVG2/lxc1_snap
     lvconvert --merge /dev/DRBDVG/DRBDLV1_snap1
@@ -420,6 +420,7 @@ Just enter the the name of the snapshot and its path, and the linked LV that is 
 
 First, stop any running LXC clients:
 
+    lxc-ls --fancy
     lxc-stop -n lxc1
     
 Then remove the snapshots with lvremove:
@@ -438,6 +439,8 @@ In /etc/lvm/lvm.conf
     https://drbd.linbit.com/users-guide/s-lvm-snapshots.html
 
 ## 4.2 Testing resizing functions
+
+One of the best features of this system is that you can resize various volumes to our needs.
 
 ### 4.2.1 Resizing the VPS thinpool (followed by updating DRBD size)
 
@@ -463,6 +466,55 @@ In this situation resizing of the VPS thinpool is easily done with lvresize or l
         pvresize /dev/drbd10 
 
 ### 4.2.2 Resizing LXC clients
+
+Reduce LVM 
+=====================================
+Reduce the lvm partition of the LXC container named "debian7" from 1Tb to 150Gb
+
+1) Stop the container:
+lxc-stop -n debian7
+2) Just to make sure it's not mounted:
+umount /dev/lxc/debian7
+3) Check partition
+e2fsck -f /dev/lxc/debian7
+4) Reduce filesystem to a little less size that you need your partition to be.
+resize2fs /dev/lxc/debian7 140G
+5) Reduce LVM partition to the size you really want (150 Gb)
+lvreduce -L 150G /dev/lxc/debian7
+6) Resize the filesystem.
+resize2fs /dev/lxc/debian7
+7) Check partition
+e2fsck -f /dev/lxc/debian7
+8) Start container
+lxc-start -d -n debian7
+
+Extend LVM
+=====================================
+Extend the lvm partition of the LXC container named "debian7" from 150Gb to 300Gb
+
+1) Stop the container:
+lxc-stop -n debian7
+2) Just to make sure it's not mounted:
+umount /dev/lxc/debian7
+3) Check partition
+e2fsck -f /dev/lxc/debian7
+4) Extend LVM partition 
+lvextend -L 300G /dev/lxc/debian7
+5) Extend filesystem.
+resize2fs /dev/lxc/debian7 300G
+6) Check partition
+e2fsck -f /dev/lxc/debian7
+8) Start container
+lxc-start -d -n debian7
+
+4.2.3 Configurating LXC clients
+
+4.2.4 Cloning LXC clients
+
+
+
+
+
 
 
 # 5. Troubleshooting
