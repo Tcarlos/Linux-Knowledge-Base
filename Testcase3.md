@@ -5,8 +5,16 @@
     1. Description
     2. Why this setup
     3. Setup
+        3.1 Getting the required programs
+        3.2 Configure LVM
+        3.3 Configure LXC
+        3.4 Cache cachedlv on SSD
+        3.5 Setup and configure the DRBD device
+        3.6 Create VPS thinpool on top of DRBD device
+        3.7 Create container(s) in VPSthinpool on DRBDVG2
+        3.8 Create a startup script
     4. Testing
- 
+    
 # 1. Description
 
 This system with lxc clients have the lxc clients inside a thinpool, on top of a DRBD device, with the whole system cached, has many resize options and have 2 types of snapshots available.
@@ -61,7 +69,7 @@ cachedlv will be our target blockdevice. On top of this we will create our DRBD 
 
 ## 3.1 Getting the required programs
 
-  sudo su
+    sudo su
     apt-get uddate && apt-get upgrade
     screen
     apt-get install lxc drbd-utils thin-provisioning-tools
@@ -82,7 +90,9 @@ Check the /etc/lvm/lvm.conf for:
     thin_pool_autoextend_threshold = 50
     thin_pool_autoextend_percent = 10
     
-## 3.3 Cache cachedlv on SSD
+## 3.3 Configure LXC
+    
+## 3.4 Cache cachedlv on SSD
 
 Caching has the advantage of quicker disk access. For optimum results we will create the cachepool on a seperate SSD disk, which is ofcourse faster than if it were on the same HDD of the LV.
 
@@ -143,7 +153,7 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
 
     lvs
 
-## 3.4 Setup the DRBD device
+## 3.5 Setup and configure the DRBD device
 
 **Set in /etc/lvm/lvm.conf:**
 
@@ -157,7 +167,7 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
     pvcreate /dev/VG1/cachedlv
         Physical volume "/dev/VG1/cachedlv" successfully created
         
-**Create VG on top of that
+**Create VG on top of that:**
 
     vgcreate DRBDVG /dev/VG1/cachedlv
         Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
@@ -239,7 +249,7 @@ To enable a stacked resource, you first enable its lower-level resource and prom
     drbdadm up --stacked r0-U 
     drbdadm primary --force --stacked r0-U
 
-**Check**
+**Check that the DRBD is working**
 
     cat /proc/drbd
     version: 8.4.5 (api:1/proto:86-101)
@@ -252,8 +262,9 @@ To enable a stacked resource, you first enable its lower-level resource and prom
     filter = [ "r|/dev/mapper/VG1-cachedlv_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|", "r|/dev/drbd0|"]
 
     /etc/init.d/lvm2 restart
+    vgck
 
-## 3.5 Create VPS thinpool on top of DRBD device**
+## 3.6 Create VPS thinpool on top of DRBD device
 
     pvcreate /dev/drbd10
     vgcreate DRBDVG2 /dev/drbd10
@@ -301,12 +312,11 @@ Substract one PE for the pools creation. What have left will be devided. And the
 
 
 
-## 3.6 Create container(s) in VPSthinpool on DRBDVG2
+## 3.7 Create container(s) in VPSthinpool on DRBDVG2
 
     lxc-create -t download -n my-container -B lvm --vgname DRBDVG2 --thinpool VPSthinPool --fssize=500M
     
-    
-## 3.7 Create a startup script
+## 3.8 Create a startup script
     
 Right after reboot, the DRBVD blockdevice is not yet up and running. With the following three commands we get it back:
 
