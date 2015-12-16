@@ -509,6 +509,15 @@ lxc-start -d -n debian7
 
 4.2.3 Configurating LXC clients
 
+To access the filesystem of an lxc client:
+
+cat /var/lib/lxc/lxc1/config reveals the path of the rootfs of the lxc client is mapped at /dev/DRBDVG2/lxc1
+to enter this filesystem:
+
+    mkdir /mount
+    mount /dev/DRBDVG2/lxc1 /mount
+    ls -la /mount
+
 4.2.4 Cloning LXC clients
 
 
