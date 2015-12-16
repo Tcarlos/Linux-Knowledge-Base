@@ -91,7 +91,54 @@ Check the /etc/lvm/lvm.conf for:
     thin_pool_autoextend_percent = 10
     
 ## 3.3 Configure LXC
+
+ sudo su
+
+**manually allocate an UID and GID range to root in /etc/subuid and /etc/subgid by adding this line in both files:**
+
+    root:100000:65536
+
+**add these same values in global configuration file /etc/lxc/default.conf, by adding these lines to it:**
+
+    lxc.id_map = u 0 100000 65536
+    lxc.id_map = g 0 100000 65536
     
+**set permissions andownerships:**
+    
+    chown root:100000 /var/lib/lxc
+    chmod 750 /var/lib/lxc
+    
+**creating and testing container:**
+
+    lxc-create -t download -n office1
+    lxc-start -n office1
+    lxc-stop -n office1
+
+**get inside the container and test networking:**
+
+    lxc-attach -n office1
+    ping 8.8.8.8
+    exit
+    
+**you can see the container status by running following commands:**
+    
+    lxc-info -n office1
+    lxc-ls --fancy
+    
+**Enable changing memory and SWAP by modifying a line in /etc/default/grub to:**
+
+    GRUB_CMDLINE_LINUX_DEFAULT="swapaccount=1"
+    
+**Modify these lines to optionally limit memory or memory+SWAP in /var/lib/lxc/office1/config:**
+
+    lxc.cgroup.memory.limit_in_bytes = 512M
+    lxc.cgroup.memory.memsw.limit_in_bytes = 1G
+
+**update grub and reboot:**
+    
+    update-grub
+    reboot
+
 ## 3.4 Cache cachedlv on SSD
 
 Caching has the advantage of quicker disk access. For optimum results we will create the cachepool on a seperate SSD disk, which is ofcourse faster than if it were on the same HDD of the LV.
@@ -369,7 +416,7 @@ Just enter the the name of the snapshot and its path, and the linked LV that is 
     lvconvert --merge /dev/DRBDVG2/lxc1_snap
     lvconvert --merge /dev/DRBDVG/DRBDLV1_snap1
 
-### 4.1.4 Removing snapshots**
+### 4.1.4 Removing snapshots
 
 First, stop any running LXC clients:
 
@@ -390,9 +437,11 @@ In /etc/lvm/lvm.conf
 
     https://drbd.linbit.com/users-guide/s-lvm-snapshots.html
 
-## 4.2 Testing resizing of various volumes
+## 4.2 Testing resizing functions
 
-**Resizing the VPS thinpool with lvresize and lvextend commands and adjusting the PV size of DRBD device right with it.**
+### 4.2.1 Resizing the VPS thinpool (followed by updating DRBD size)
+
+In this situation resizing of the VPS thinpool is easily done with lvresize or lvextend command. Right after this we update the PV of the DRBD too to optimize volume usage. 
 
     lvresize DRBDVG2/VPSthinpool -L +50M 
     Rounding size to boundary between physical extents: 52.00 MiB Size of logical volume DRBDVG2/VPSthinpool_tdata changed from 128.00 MiB (32 extents) to 180.00 MiB (45 extents). 
@@ -413,7 +462,10 @@ In /etc/lvm/lvm.conf
         
         pvresize /dev/drbd10 
 
-**resizing lxc clients**
+### 4.2.2 Resizing LXC clients
+
+
+# 5. Troubleshooting
     
         
 
