@@ -22,11 +22,15 @@
         4.1.5 Auto extending snapshots
         4.1.6 Automatic snapshots with DRBD
       4.2 Testing resizing functions
-        4.2.1 Resizing the VPS thinpool (followed by updating DRBD size)
-        4.2.2 Resizing LXC clients
-        4.2.3 Configurating LXC clients
-        4.2.4 Cloning LXC clients
-    5. Troubleshooting
+        4.2.1 Resizing LXC clients
+            4.2.1.1 Reducing LXC clients
+            4.2.1.2 Increasing LXC Clients
+        4.2.3 Overprovisioning Thinpools
+      4.3 Other Functions
+        4.3.1 Configurating LXC clients
+        4.3.2 Cloning LXC clients
+    5. Usecases
+    6. Troubleshooting
     
 # 1. Description
 
