@@ -633,6 +633,12 @@ to enter this filesystem:
 
 ### 4.3.3 Testing DRBD Synchronisation works correctly 
 
+Monitoring
+
+cat /proc/drbd
+
+    http://drbd.linbit.com/users-guide/ch-admin.html#s-check-status
+
 
 
 # 5. Usecases
