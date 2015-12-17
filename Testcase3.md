@@ -410,9 +410,6 @@ To see howmuch space is available use these commands for more info:
     lvs
     lvdisplay 
     lvdisplay VG1
-    
-Overprovisioning
-
 
 ### 4.1.1 Snapshotting the LV right under the DRBD device
 
@@ -586,7 +583,7 @@ e2fsck -f /dev/lxc/debian7
 8) Start container
 lxc-start -d -n debian7
 
-4.2.3 Configurating LXC clients
+Configurating LXC clients
 
 To access the filesystem of an lxc client:
 
@@ -597,8 +594,11 @@ to enter this filesystem:
     mount /dev/DRBDVG2/lxc1 /mount
     ls -la /mount
 
-4.2.4 Cloning LXC clients
+Cloning LXC clients
 
+### 4.2.3 Overprovisioning Thinpools
+
+http://www.tecmint.com/setup-thin-provisioning-volumes-in-lvm/
 
 
 
