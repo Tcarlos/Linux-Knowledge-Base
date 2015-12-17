@@ -402,7 +402,7 @@ Followed by starting the LXC client(s):
 
 This setup provides 2 snapshot features
 
- - Snapshotting the LV right under the DRBD device
+ - Snapshotting the LV / Thinvolume right under the DRBD device
  
  - Snapshotting the individual LXC clients
 
@@ -432,10 +432,11 @@ Just enter the the name of the snapshot with its path, and the linked LV that is
 
 ### 4.1.4 Removing snapshots
 
-First, stop any running LXC clients:
+First, stop any running LXC clients and/or unmount possible mounted volumes
 
     lxc-ls --fancy
     lxc-stop -n lxc1
+    umount /dev/mapper/DRBDVG2-lxc1
     
 Then remove the snapshots with lvremove:
 
@@ -629,6 +630,10 @@ to enter this filesystem:
     ls -la /mount
 
 ### 4.3.2 Cloning LXC clients
+
+### 4.3.3 Testing DRBD Synchronisation works correctly 
+
+
 
 # 5. Usecases
 
