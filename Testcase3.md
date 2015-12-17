@@ -14,6 +14,19 @@
         3.7 Create container(s) in VPSthinpool on DRBDVG2
         3.8 Create a startup script
     4. Testing
+      4.1 Testing LVM Snapshot functions
+        4.1.1 Snapshotting the LV right under the DRBD device
+        4.1.2 Snapshotting the individual LXC clients
+        4.1.3 Restoring Logical Volumes with Snapshots
+        4.1.4 Removing snapshots
+        4.1.5 Auto extending snapshots
+        4.1.6 Automatic snapshots with DRBD
+      4.2 Testing resizing functions
+        4.2.1 Resizing the VPS thinpool (followed by updating DRBD size)
+        4.2.2 Resizing LXC clients
+        4.2.3 Configurating LXC clients
+        4.2.4 Cloning LXC clients
+    5. Troubleshooting
     
 # 1. Description
 
