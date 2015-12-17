@@ -543,47 +543,77 @@ In this situation resizing of the VPS thinpool is easily done with lvresize or l
 
 ### 4.2.2 Resizing LXC clients
 
-Reduce LVM 
-=====================================
-Reduce the lvm partition of the LXC container named "debian7" from 1Tb to 150Gb
+#### 4.2.2.1 Reducing LXC clients
 
 1) Stop the container:
-lxc-stop -n debian7
+
+    lxc-stop -n debian7
+
 2) Just to make sure it's not mounted:
-umount /dev/lxc/debian7
+
+    umount /dev/lxc/debian7
+
 3) Check partition
-e2fsck -f /dev/lxc/debian7
+
+    e2fsck -f /dev/lxc/debian7
+
 4) Reduce filesystem to a little less size that you need your partition to be.
-resize2fs /dev/lxc/debian7 140G
-5) Reduce LVM partition to the size you really want (150 Gb)
-lvreduce -L 150G /dev/lxc/debian7
-6) Resize the filesystem.
-resize2fs /dev/lxc/debian7
-7) Check partition
-e2fsck -f /dev/lxc/debian7
-8) Start container
-lxc-start -d -n debian7
 
-Extend LVM
-=====================================
-Extend the lvm partition of the LXC container named "debian7" from 150Gb to 300Gb
+    resize2fs /dev/lxc/debian7 140G
+
+5) Reduce LVM partition to the size you really want (150 Gb)
+
+    lvreduce -L 150G /dev/lxc/debian7
+
+6) Resize the filesystem.
+
+    resize2fs /dev/lxc/debian7
+
+7) Check partition
+
+    e2fsck -f /dev/lxc/debian7
+
+8) Start container
+
+    lxc-start -d -n debian7
+
+#### 4.2.2.2 Increasing LXC Clients
 
 1) Stop the container:
-lxc-stop -n debian7
-2) Just to make sure it's not mounted:
-umount /dev/lxc/debian7
-3) Check partition
-e2fsck -f /dev/lxc/debian7
-4) Extend LVM partition 
-lvextend -L 300G /dev/lxc/debian7
-5) Extend filesystem.
-resize2fs /dev/lxc/debian7 300G
-6) Check partition
-e2fsck -f /dev/lxc/debian7
-8) Start container
-lxc-start -d -n debian7
 
-Configurating LXC clients
+    lxc-stop -n debian7
+
+2) Just to make sure it's not mounted:
+
+    umount /dev/lxc/debian7
+
+3) Check partition
+
+    e2fsck -f /dev/lxc/debian7
+
+4) Extend LVM partition 
+
+    lvextend -L 300G /dev/lxc/debian7
+
+5) Extend filesystem.
+
+    resize2fs /dev/lxc/debian7 300G
+
+6) Check partition
+
+    e2fsck -f /dev/lxc/debian7
+
+8) Start container
+
+    lxc-start -d -n debian7
+
+### 4.2.3 Overprovisioning Thinpools
+
+    http://www.tecmint.com/setup-thin-provisioning-volumes-in-lvm/
+
+## 4.3 Other Functions
+
+### 4.3.1 Configurating LXC clients
 
 To access the filesystem of an lxc client:
 
@@ -594,18 +624,16 @@ to enter this filesystem:
     mount /dev/DRBDVG2/lxc1 /mount
     ls -la /mount
 
-Cloning LXC clients
+### 4.3.2 Cloning LXC clients
 
-### 4.2.3 Overprovisioning Thinpools
-
-http://www.tecmint.com/setup-thin-provisioning-volumes-in-lvm/
+# 5. Usecases
 
 
 
 
 
 
-# 5. Troubleshooting
+# 6. Troubleshooting
     
         
 
