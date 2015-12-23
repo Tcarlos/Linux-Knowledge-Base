@@ -1,4 +1,4 @@
-**NOTES DECEMBER 23rd **
+**NOTES DECEMBER 23rd**
 
 Have a succesful working basic DRBD 2node syncing setup
 
