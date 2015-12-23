@@ -4,11 +4,11 @@ Have a succesful working basic DRBD 2node setup
 
 Links used
 
-https://drbd.linbit.com/users-guide/ch-configure.html
-https://drbd.linbit.com/users-guide/s-prepare-network.html
-https://drbd.linbit.com/users-guide/s-configure-resource.html
-https://drbd.linbit.com/users-guide/s-first-time-up.html
-https://drbd.linbit.com/users-guide/s-initial-full-sync.html
+        https://drbd.linbit.com/users-guide/ch-configure.html
+        https://drbd.linbit.com/users-guide/s-prepare-network.html
+        https://drbd.linbit.com/users-guide/s-configure-resource.html
+        https://drbd.linbit.com/users-guide/s-first-time-up.html
+        https://drbd.linbit.com/users-guide/s-initial-full-sync.html
 
 ### 1. Prepare low level storage
 
