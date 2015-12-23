@@ -1,6 +1,6 @@
 ** NOTES DECEMBER 23rd **
 
-Have a succesful working basic DRBD 2node setup
+Have a succesful working basic DRBD 2node syncing setup
 
 Links used
 
@@ -35,13 +35,13 @@ Fresh after Ubunutu Server install we have 4 Logical Volumes: rootlv, bootlv, sw
 
         lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
         
-** NOW CREATE A 2nd NODE WITH THE EXACT SAME SETUP! **
+**NOW CREATE A 2nd NODE WITH THE EXACT SAME SETUP!**
 
 ### 2. Preparing network configuration
 
 Create on our two DRBD hosts each a currently unused network interface, eth1, with IP addresses 10.1.1.31 and 10.1.1.32 assigned to it, respectively, by editing a file in /etc/network/interfaces and the settings of the VM in VirtualBox.
 
-** Add these lines in /etc/network/interfaces**
+**Add these lines in /etc/network/interfaces**
 
 **NODE 1, livenode5**
 
@@ -57,7 +57,7 @@ Create on our two DRBD hosts each a currently unused network interface, eth1, wi
           address 10.1.1.32
           netmask 255.255.255.0
           
-** VM configuration** 
+**VM configuration** 
 
 Now shutdown the VMs, rightclick -> settings -> Network -> adapter2 tab.
 
@@ -65,7 +65,7 @@ Now shutdown the VMs, rightclick -> settings -> Network -> adapter2 tab.
         name: intn
         promiscious mode: allow all
 
-Restart the VMs
+**Restart the VMs**
 
 
 ### 3. Configure DRBD (on both livenode5 and livenode6)
@@ -90,7 +90,7 @@ Restart the VMs
 
 ### 4. Enabling resource for first time
 
-**Create device meta data
+**Create device meta data**
 
         drbdadm create-md r0
         initializing activity log
