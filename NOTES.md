@@ -1,6 +1,8 @@
-** UPDATE **
+** UPDATE JAN 1st **
 
 The three stacked setup only works with a working DRBD device, stacked upon another. Richards setup doesnt have a working DRBD device, the stacked resource is only on one node, and one node isnt a working DRBD device.
+
+So, I need to create a 3rd node back home on Virtual Box, in the meantime I can fairly say the basic 2 node setup will work with the LXC shebang, since Dec 23 update already has the basic setup on top of the wellknown thinpool setup as described in testcase 3.
 
 
 
