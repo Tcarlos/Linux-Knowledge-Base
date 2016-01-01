@@ -1,3 +1,41 @@
+**NOTES DECEMBER 31st**
+
+Trying to implement the new DRBD knowledge in testcase 3.
+
+- Discovered that to remove the LV's under the DRBD device, first do drbdadm down r0
+- Comparing Richards setup with the three node setup, I can conclude that Richards setup is one node, that is connected to a backup node, with protocol A, which is useful for long distance replication according to  https://drbd.linbit.com/users-guide/s-replication-protocols.html. 
+
+
+Ok, create a thinpool on PV/VG thingy
+
+
+**Create PV & VG**
+
+        pvcreate /dev/VG1/cachedlv
+        vgcreate DRBDVG /dev/VG1/cachedlv
+
+**Create Thinpool**
+
+        lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
+        lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
+
+        lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
+        WARNING: Converting logical volume DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta to pool's data and metadata volumes.
+    THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
+    Do you really want to convert DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta? [y/n]: y
+    Logical volume "lvol0" created
+    Converted DRBDVG/cachedDRBDthinpool to thin pool.
+    
+**Create Thin Volume**
+
+        lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
+        
+        
+Now, we will create richards DRBD device:
+
+
+
+
 **NOTES DECEMBER 23rd**
 
 Have a succesful working basic DRBD 2node syncing setup
