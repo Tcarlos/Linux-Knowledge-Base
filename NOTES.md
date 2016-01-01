@@ -1,3 +1,9 @@
+** UPDATE **
+
+The three stacked setup only works with a working DRBD device, stacked upon another. Richards setup doesnt have a working DRBD device, the stacked resource is only on one node, and one node isnt a working DRBD device.
+
+
+
 **NOTES DECEMBER 31st**
 
 Trying to implement the new DRBD knowledge in testcase 3.
@@ -30,8 +36,42 @@ Ok, create a thinpool on PV/VG thingy
 
         lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
         
-        
 Now, we will create richards DRBD device:
+
+        resource r0 {
+         on livenode5 {
+         device /dev/drbd0;
+         disk /dev/mapper/DRBDVG-DRBDLV1;
+         address 10.1.1.31:7789;
+         meta-disk internal;
+         }
+        }
+
+        resource r0-U {
+        net {
+        protocol A;
+        }
+
+        stacked-on-top-of r0 {
+        device /dev/drbd10;
+        address 127.0.0.1:7791;
+        }
+
+        on livenode6 {
+        device /dev/drbd10;
+        disk /dev/mapper/DRBDVG-DRBDLV1;
+        address 10.1.1.32:7794;
+        meta-disk internal;
+        }
+        }
+
+** UPDATE **
+
+The three stacked setup only works with a working DRBD device, stacked upon another. Richards setup doesnt have a working DRBD device, the stacked resource is only on one node, and one node isnt a working DRBD device.
+
+
+
+
 
 
 
