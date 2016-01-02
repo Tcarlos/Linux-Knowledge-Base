@@ -1,4 +1,4 @@
-** 2nd UPDATE JAN 2ND **
+**2nd UPDATE JAN 2ND**
 
 Didnt got the basic setup working again. Pondered and pondered, till I discovered that the commands drbdadm create-md r0 and drbdadm up r0 most be done on BOTH nodes..
 At least I got some xp on reproducing and updated the documentation.
@@ -6,21 +6,19 @@ So, during my vacation I disovered richard has a seemingly non working 2 node se
 
 Still lots of work to do, namely:
 
--update documentation 
--test richards '2 node setup', just in case
--make a 3 node drbd setup at home
--now that we have confirmed synchronization, find out when it syncs and how long, (see testcase 3, chapter 4.1.6.3)
--make a backup script that makes a snapshot before the syncing takes place
+- update documentation 
+- test richards '2 node setup', just in case
+- make a 3 node drbd setup at home
+- now that we have confirmed synchronization, find out when it syncs and how long, (see testcase 3, chapter 4.1.6.3)
+- make a backup script that makes a snapshot before the syncing takes place
 
 
 
-** UPDATE JAN 1st **
+**UPDATE JAN 1ST**
 
 The three stacked setup only works with a working DRBD device, stacked upon another. Richards setup doesnt have a working DRBD device, the stacked resource is only on one node, and one node isnt a working DRBD device.
 
 So, I need to create a 3rd node back home on Virtual Box, in the meantime I can fairly say the basic 2 node setup will work with the LXC shebang, since Dec 23 update already has the basic setup on top of the wellknown thinpool setup as described in testcase 3.
-
-
 
 **NOTES DECEMBER 31st**
 
