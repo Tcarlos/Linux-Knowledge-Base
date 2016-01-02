@@ -1,3 +1,53 @@
+** 2nd UPDATE JAN 1st **
+
+WORKS AGAIN!
+
+LIVENODE5 output:
+
+root@livenode5:/home/office# drbdadm create-md r0
+^C
+root@livenode5:/home/office# nano /etc/drbd.d/r0.res
+root@livenode5:/home/office# drbdadm create-md r0
+md_offset 10737414144
+al_offset 10737381376
+bm_offset 10737053696
+
+Found LVM2 physical volume signature
+    10481664 kB data area apparently used
+    10485404 kB left usable by current configuration
+
+Even though it looks like this would place the new meta data into
+unused space, you still need to confirm, as this is only a guess.
+
+Do you want to proceed?
+[need to type 'yes' to confirm] yes
+
+initializing activity log
+NOT initializing bitmap
+Writing meta data...
+New drbd meta data block successfully created.
+root@livenode5:/home/office# drdbadm r0
+No command 'drdbadm' found, did you mean:
+ Command 'drbdadm' from package 'drbd-utils' (main)
+drdbadm: command not found
+root@livenode5:/home/office# drbdadm up r0
+root@livenode5:/home/office# cat /proc/drbd
+version: 8.4.5 (api:1/proto:86-101)
+srcversion: 82483CBF1A7AFF700CBEEC5
+
+ 1: cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent C r-----
+    ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:10485404
+root@livenode5:/home/office# drbdadm primary --force r0
+root@livenode5:/home/office# cat /proc/drbd
+version: 8.4.5 (api:1/proto:86-101)
+srcversion: 82483CBF1A7AFF700CBEEC5
+
+ 1: cs:SyncSource ro:Primary/Secondary ds:UpToDate/Inconsistent C r-----
+    ns:17872 nr:0 dw:0 dr:18152 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:10467532
+        [>....................] sync'ed:  0.2% (10220/10236)M
+        finish: 0:58:09 speed: 2,976 (2,976) K/sec
+
+
 ** UPDATE JAN 1st **
 
 The three stacked setup only works with a working DRBD device, stacked upon another. Richards setup doesnt have a working DRBD device, the stacked resource is only on one node, and one node isnt a working DRBD device.
