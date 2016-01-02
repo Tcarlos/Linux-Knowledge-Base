@@ -1,3 +1,28 @@
+looking over at the 3 stacked setup I see 4 IPs. After some long guessing, me thinks IP number 3 is the public IP of the primary, the synchronization source, 'the master', the one with the primary force r0 command
+
+### 1
+
+noticed that during a reboot of livenode 5, the cat /proc/drbd of livenode 6 went from 
+
+cat /proc/drbd
+version: 8.4.5 (api:1/proto:86-101)
+srcversion: 82483CBF1A7AFF700CBEEC5
+
+ 1: cs:WFConnection ro:Secondary/Unknown ds:UpToDate/DUnknown C r-----
+    ns:0 nr:246700 dw:246700 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:0
+root@livenode6:/home/office# cat /proc/drbd
+version: 8.4.5 (api:1/proto:86-101)
+srcversion: 82483CBF1A7AFF700CBEEC5
+
+ 1: cs:Connected ro:Secondary/Secondary ds:UpToDate/UpToDate C r-----
+    ns:0 nr:250796 dw:250796 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:0
+    
+### 2    
+
+ after rebooting livenode 5, only this command is necessairy to enable/activate the blockdevice drbd1, which houses the lxc thinpool
+
+
+
 **2nd UPDATE JAN 2ND**
 
 Didnt got the basic setup working again. Pondered and pondered, till I discovered that the commands drbdadm create-md r0 and drbdadm up r0 most be done on BOTH nodes..
@@ -11,21 +36,25 @@ Still lots of work to do, namely:
 - make a 3 node drbd setup at home
 - now that we have confirmed synchronization, find out when it syncs and how long, (see testcase 3, chapter 4.1.6.3)
 - make a backup script that makes a snapshot before the syncing takes place
+- test that data written on livenode 5 is synced and visible on livenode 6!!
+- study drbd common tasks drbd.init.com chapter 6, for instance drbd resize
 
-resource r0 {
-       on livenode5 {
-          device    /dev/drbd1;
-          disk      /dev/mapper/DRBDVG-DRBDLV1;
-          address   10.1.1.31:7789;
-          meta-disk internal;
-       }
-       on livenode6 {
-            device    /dev/drbd1;
-            disk      /dev/mapper/DRBDVG-DRBDLV1;
-            address   10.1.1.32:7789;
-            meta-disk internal;
-       }
-    }
+b
+
+       resource r0 {
+              on livenode5 {
+              device    /dev/drbd1;
+              disk      /dev/mapper/DRBDVG-DRBDLV1;
+              address   10.1.1.31:7789;
+              meta-disk internal;
+              }
+              on livenode6 {
+              device    /dev/drbd1;
+              disk      /dev/mapper/DRBDVG-DRBDLV1;
+              address   10.1.1.32:7789;
+              meta-disk internal;
+              }
+       }  
 
 
 
