@@ -2,6 +2,11 @@
 
 WORKS AGAIN!
 
+note that I also done on livenode6:
+
+drbdadm create-md r0
+drbdadm up r0
+
 LIVENODE5 output:
 
 root@livenode5:/home/office# drbdadm create-md r0
