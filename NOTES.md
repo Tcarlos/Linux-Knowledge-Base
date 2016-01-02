@@ -12,6 +12,22 @@ Still lots of work to do, namely:
 - now that we have confirmed synchronization, find out when it syncs and how long, (see testcase 3, chapter 4.1.6.3)
 - make a backup script that makes a snapshot before the syncing takes place
 
+resource r0 {
+       on livenode5 {
+          device    /dev/drbd1;
+          disk      /dev/mapper/DRBDVG-DRBDLV1;
+          address   10.1.1.31:7789;
+          meta-disk internal;
+       }
+       on livenode6 {
+            device    /dev/drbd1;
+            disk      /dev/mapper/DRBDVG-DRBDLV1;
+            address   10.1.1.32:7789;
+            meta-disk internal;
+       }
+    }
+
+
 
 
 **UPDATE JAN 1ST**
