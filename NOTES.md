@@ -1,56 +1,17 @@
-** 2nd UPDATE JAN 1st **
+** 2nd UPDATE JAN 2ND **
 
-WORKS AGAIN!
+Didnt got the basic setup working again. Pondered and pondered, till I discovered that the commands drbdadm create-md r0 and drbdadm up r0 most be done on BOTH nodes..
+At least I got some xp on reproducing and updated the documentation.
+So, during my vacation I disovered richard has a seemingly non working 2 node setup, and I discovered that the above commands must be done on both nodes.
 
-note that I also done on livenode6:
+Still lots of work to do, namely:
 
-drbdadm create-md r0
-drbdadm up r0
+-update documentation 
+-test richards '2 node setup', just in case
+-make a 3 node drbd setup at home
+-now that we have confirmed synchronization, find out when it syncs and how long, (see testcase 3, chapter 4.1.6.3)
+-make a backup script that makes a snapshot before the syncing takes place
 
-LIVENODE5 output:
-
-root@livenode5:/home/office# drbdadm create-md r0
-^C
-root@livenode5:/home/office# nano /etc/drbd.d/r0.res
-root@livenode5:/home/office# drbdadm create-md r0
-md_offset 10737414144
-al_offset 10737381376
-bm_offset 10737053696
-
-Found LVM2 physical volume signature
-    10481664 kB data area apparently used
-    10485404 kB left usable by current configuration
-
-Even though it looks like this would place the new meta data into
-unused space, you still need to confirm, as this is only a guess.
-
-Do you want to proceed?
-[need to type 'yes' to confirm] yes
-
-initializing activity log
-NOT initializing bitmap
-Writing meta data...
-New drbd meta data block successfully created.
-root@livenode5:/home/office# drdbadm r0
-No command 'drdbadm' found, did you mean:
- Command 'drbdadm' from package 'drbd-utils' (main)
-drdbadm: command not found
-root@livenode5:/home/office# drbdadm up r0
-root@livenode5:/home/office# cat /proc/drbd
-version: 8.4.5 (api:1/proto:86-101)
-srcversion: 82483CBF1A7AFF700CBEEC5
-
- 1: cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent C r-----
-    ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:10485404
-root@livenode5:/home/office# drbdadm primary --force r0
-root@livenode5:/home/office# cat /proc/drbd
-version: 8.4.5 (api:1/proto:86-101)
-srcversion: 82483CBF1A7AFF700CBEEC5
-
- 1: cs:SyncSource ro:Primary/Secondary ds:UpToDate/Inconsistent C r-----
-    ns:17872 nr:0 dw:0 dr:18152 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:10467532
-        [>....................] sync'ed:  0.2% (10220/10236)M
-        finish: 0:58:09 speed: 2,976 (2,976) K/sec
 
 
 ** UPDATE JAN 1st **
