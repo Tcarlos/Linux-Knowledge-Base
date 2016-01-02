@@ -20,6 +20,18 @@ srcversion: 82483CBF1A7AFF700CBEEC5
 ### 2    
 
  after rebooting livenode 5, only this command is necessairy to enable/activate the blockdevice drbd1, which houses the lxc thinpool
+ 
+ ### 3 
+ 
+ cat /proc/drbd shows green light
+ 
+ ### 4 more DRBD links:
+
+**Contains data replication testing!!**
+
+https://help.ubuntu.com/lts/serverguide/drbd.html
+https://imanudin.net/2015/03/23/testing-data-replicationsynchronize-on-drbd/
+
 
 
 
@@ -36,7 +48,7 @@ Still lots of work to do, namely:
 - make a 3 node drbd setup at home
 - now that we have confirmed synchronization, find out when it syncs and how long, (see testcase 3, chapter 4.1.6.3)
 - make a backup script that makes a snapshot before the syncing takes place
-- test that data written on livenode 5 is synced and visible on livenode 6!!
+- test that data written on livenode 5 is synced and visible on livenode 6!! IF not working with VPS try with easier data instead of VPS thinpool!!!!!
 - study drbd common tasks drbd.init.com chapter 6, for instance drbd resize
 
 b
