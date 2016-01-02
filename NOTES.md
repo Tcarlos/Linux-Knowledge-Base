@@ -16,16 +16,19 @@ srcversion: 82483CBF1A7AFF700CBEEC5
 
  1: cs:Connected ro:Secondary/Secondary ds:UpToDate/UpToDate C r-----
     ns:0 nr:250796 dw:250796 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:0
+   
     
+
 ### 2    
 
  after rebooting livenode 5, only this command is necessairy to enable/activate the blockdevice drbd1, which houses the lxc thinpool
  
- ### 3 
+ 
+### 3 
  
  cat /proc/drbd shows green light
  
- ### 4 more DRBD links:
+### 4 more DRBD links:
 
 **Contains data replication testing!!**
 
