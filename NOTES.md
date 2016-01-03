@@ -46,6 +46,8 @@ https://blogs.it.ox.ac.uk/jamest/2011/06/03/replicating-block-devices-with-drbd/
 
 HMZ..... first try to test data replication with just a normal mount setup, THEN try to figure out how to test data replication of an LV (thinpool LV with the LXC clients in it)
 
+https://www.google.nl/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=replicating%20physical%20devices%20drbd%20lvm
+
 #### 5 info on lxc mount location
 
 /var/lib/lxc/my-container/config
