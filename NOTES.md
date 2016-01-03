@@ -1,4 +1,6 @@
+**update**
 
+https://wiki.ubuntu.com/Testing/Cases/UbuntuServer-drbd  good lead!!
 
 looking over at the 3 stacked setup I see 4 IPs. After some long guessing, me thinks IP number 3 is the public IP of the primary, the synchronization source, 'the master', the one with the primary force r0 command
 
