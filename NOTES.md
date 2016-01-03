@@ -41,6 +41,8 @@ https://imanudin.net/2015/03/23/testing-data-replicationsynchronize-on-drbd/
 
 **replication data testing requires mounting files, sameway like testing snapshots and the old rsync stuff. but can this also be done with not just a normal mount thing (with a file system?), but also with vps thinpool and/or lxc clients?
 
+https://drbd.linbit.com/users-guide/s-nested-lvm.html
+
 #### 5 info on lxc mount location
 
 /var/lib/lxc/my-container/config
