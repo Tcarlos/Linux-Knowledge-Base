@@ -53,6 +53,7 @@ Still lots of work to do, namely:
 - make a backup script that makes a snapshot before the syncing takes place
 - test that data written on livenode 5 is synced and visible on livenode 6!! IF not working with VPS try with easier data instead of VPS thinpool!!!!!
 - study drbd common tasks drbd.init.com chapter 6, for instance drbd resize
+- -FIND MOUNT LOCATION OF LXC CONTAINER!!! AND DOCUMENT
 
 b
 
