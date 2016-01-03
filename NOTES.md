@@ -1,3 +1,5 @@
+
+
 looking over at the 3 stacked setup I see 4 IPs. After some long guessing, me thinks IP number 3 is the public IP of the primary, the synchronization source, 'the master', the one with the primary force r0 command
 
 ### 1
@@ -23,6 +25,8 @@ srcversion: 82483CBF1A7AFF700CBEEC5
 
  after rebooting livenode 5, only this command is necessairy to enable/activate the blockdevice drbd1, which houses the lxc thinpool
  
+ drbdadm primary --force r0
+ 
  
 ### 3 
  
@@ -34,6 +38,16 @@ srcversion: 82483CBF1A7AFF700CBEEC5
 
 https://help.ubuntu.com/lts/serverguide/drbd.html
 https://imanudin.net/2015/03/23/testing-data-replicationsynchronize-on-drbd/
+
+**replication data testing requires mounting files, sameway like testing snapshots and the old rsync stuff. but can this also be done with not just a normal mount thing (with a file system?), but also with vps thinpool and/or lxc clients?
+
+#### 5 info on lxc mount location
+
+/var/lib/lxc/my-container/config
+/etc/lxc/default.conf
+lxc.rootfs = /dev/DRBDVG2/my-container2
+
+**mount /dev/mapper/DRBDVG2-my--container2 /mnt**
 
 
 
