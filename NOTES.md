@@ -1,3 +1,38 @@
+**update Jan 3rd**
+
+Back home from vacation. Have no problem setting up a basic DRBD device now. There are some notes though, see #1 and #2 of today. Also Also fixed the LXC mount info, see below. Tomorrow I will try the three node setup. Also finish the 2do list I made in recent update.
+
+    /var/lib/lxc/my-container/config
+    /etc/lxc/default.conf
+     lxc.rootfs = /dev/DRBDVG2/my-container2
+     mount /dev/mapper/DRBDVG2-my--container2 /mnt**
+     
+
+
+
+### 1
+
+For some reason, I can't create a PV on /dev/drbd1 with the 'old' settings in /etc/lvm/lvm.conf. After responding to the error by deleting the /dev/drbd1 entry, followed by restarting lvm and vgck, the pv creation does work, and the LXC thinpool with working LXC clients.
+
+    #filter = [ "r|/dev/mapper/VG1-cachedLV_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|", "r|/dev/drbd1|"]
+    filter = [ "r|/dev/mapper/VG1-cachedLV_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|"]
+
+
+### 2
+
+During my testing, I've created and removed many LXC clients, but not a complete wipe, because I get this error:
+
+    Container already exists
+  
+Please fix by figuring a complete wipe.
+
+### 3 
+
+cat /proc/drbd shows a syncing/synced DRBD setup, but there is also service drbd status. For some reason, I had that one green and active previous time, except now I have to do service drbd start in order to get there. Find out why, and find out what extra feature(s) this gives next to the /proc/drbd output
+
+
+
+
 **update**
 
 https://wiki.ubuntu.com/Testing/Cases/UbuntuServer-drbd  good lead!!
@@ -29,10 +64,6 @@ srcversion: 82483CBF1A7AFF700CBEEC5
  
  drbdadm primary --force r0
  
- 
-### 3 
- 
- cat /proc/drbd shows green light
  
 ### 4 more DRBD links:
 
