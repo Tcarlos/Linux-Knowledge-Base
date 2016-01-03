@@ -48,6 +48,10 @@ HMZ..... first try to test data replication with just a normal mount setup, THEN
 
 https://www.google.nl/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=replicating%20physical%20devices%20drbd%20lvm
 
+https://pve.proxmox.com/wiki/DRBD
+
+**use the forum and ask thenm or linbit!!!**
+
 #### 5 info on lxc mount location
 
 /var/lib/lxc/my-container/config
