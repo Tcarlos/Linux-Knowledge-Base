@@ -7,11 +7,11 @@ Made big progress! I managed to test data replication with nested Logical Volume
 3. Create on the VG an LV name lv_test
 4. Make some data on the LV by making an ext4 FS and mounting it on e.g. /mnt followed by touch MOOOOO
 5. Be outside the /mnt directory and unmount again.
-6. Now do this to make the LVs available on the other node:
+6. Now do this to make the LV available on the other node:
 
         
         
-        To make them available on the other node, issue the following commands on the primary node (livenode5):
+        To make LV available on the other node, issue the following commands on the primary node (livenode5):
 
         # vgchange -a n replicated
         0 logical volume(s) in volume group "replicated" now active
