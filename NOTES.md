@@ -1,3 +1,38 @@
+**update Jan 4th**
+
+Made big progress! I managed to test data replication with nested Logical Volumes on top of the DRBD device!
+
+1. Have a working basic DRBD device
+2. Create on the DRBD device a PV and VG
+3. Create on the VG an LV name lv_test
+4. Make some data on the LV by making an ext4 FS and mounting it on e.g. /mnt followed by touch MOOOOO
+5. Be outside the /mnt directory and unmount again.
+6. Now do this to make the LVs available on the other node:
+
+        
+        
+        To make them available on the other node, issue the following commands on the primary node (livenode5):
+
+        # vgchange -a n replicated
+        0 logical volume(s) in volume group "replicated" now active
+        # drbdadm secondary r0
+        Then, issue these commands on the other (still secondary) node:
+
+        # drbdadm primary r0
+        # vgchange -a y replicated
+        2 logical volume(s) in volume group "replicated" now active
+        The block device /dev/replicated/lv_test will be available on the other (now primary) node (livenode6)
+        
+    Mount on livenode6 and observce succesful data replication!
+    
+        mount /dev/replicated/test /mnt && ls - la
+        drwxr-xr-x  3 root root  1024 Jan  4 16:57 .
+        drwxr-xr-x 24 root root  4096 Nov 13 16:10 ..
+        drwx------  2 root root 12288 Jan  4 16:43 lost+found
+        -rw-r--r--  1 root root     0 Jan  4 16:57 moooooooo
+
+        
+
 **update Jan 3rd**
 
 Back home from vacation. Have no problem setting up a basic DRBD device now. There are some notes though, see #1 and #2 of today. Also Also fixed the LXC mount info, see below. Tomorrow I will try the three node setup. Also finish the 2do list I made in recent update.
