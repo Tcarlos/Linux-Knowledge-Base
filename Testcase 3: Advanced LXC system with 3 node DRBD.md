@@ -11,10 +11,14 @@
         3.2 Configure LVM
         3.3 Configure LXC
         3.4 Cache cachedlv on SSD
-        3.5 Setup and configure the DRBD device
-        3.6 Create VPS thinpool on top of DRBD device
-        3.7 Create container(s) in VPSthinpool on DRBDVG2
-        3.8 Create a startup script
+        3.5 Create on top of cachedlv a thinpool 
+        3.6 Setup and configure the DRBD device
+          3.6.1 Create internal IPs for the first and second node
+          3.6.2 Create IP aliases on the first and second node
+          3.6.3 Create DRBDD configuration file on all three nodes
+        3.7 Create VPS thinpool on top of DRBD device
+        3.8 Create container(s) in VPSthinpool on DRBDVG2
+        3.9 Create a startup script
     4. Testing
       4.1 Testing LVM Snapshot functions
         4.1.1 Snapshotting the LV right under the DRBD device
@@ -260,10 +264,10 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
   
     lvconvert --type cache --cachepool VG1/cachedata VG1/cachedlv
         Logical volume VG1/cachedlv is now cached.
+        
+## 3.5 Create on top of cachedlv a thinpool 
 
-    lvs
-
-## 3.5 Setup and configure the DRBD device
+In this thinpool we use a thin volume as backing device and basis for DRBD
 
 **Set in /etc/lvm/lvm.conf:**
 
@@ -288,7 +292,6 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
         Physical volume "/dev/VG1/cachedlv" successfully created
             Volume group "DRBDVG" successfully created
             
-
 **Create Thinpool**
 
         lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
@@ -304,10 +307,81 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
 **Create Thin Volume**
 
         lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
+        
+**Set filters in /etc/lvm/lvm.conf**
 
-**Config DRBD config file**
+    filter = [ "r|/dev/mapper/VG1-cachedlv_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|", 
+    /etc/init.d/lvm2 restart
+    vgck
 
+## 3.6 Setup and configure the DRBD device
+
+Now we will create a 3 node DRBD device.
+This is quite an advanced setup. Please follow the exact sequences of commands and watch out you are on the right node.
+
+### 3.6.1 Create internal IPs for the first and second node
+
+Add these lines in /etc/network/interfaces
+
+NODE 1, livenode5
+
+    auto eth1
+    iface eth1 inet static
+      address 10.1.1.31
+      netmask 255.255.255.0
+
+NODE 2, livenode6
+
+    auto eth1
+    iface eth1 inet static
+      address 10.1.1.32
+      netmask 255.255.255.0
+
+Now shutdown the VMs, rightclick -> settings -> Network -> adapter2 tab. Apply these settings:
+
+    Attached to: Internal Network
+    name: intn
+    promiscious mode: allow all
+
+Restart the VMs
+
+### 3.6.2 Create IP aliases on the first and second node
+
+Find your gateway adress:
+
+    route |grep UG
+
+Next, add these lines in /etc/network/interfaces
+
+NODE 1, livenode5
+
+    auto eth0:1
+    allow-hotplug eth0:1
+    iface eth0:1 inet static
+    address 192.168.0.120  
+    netmask 255.255.255.0
+    gateway 192.168.0.1
+
+NODE 2, livenode6
+
+    auto eth0:1
+    allow-hotplug eth0:1
+    iface eth0:1 inet static
+    address 192.168.0.120 #yes this IP is the same on both nodes
+    netmask 255.255.255.0
+    gateway 192.168.0.1
+    
+Restart the VMs, or do
+
+    service networking restart
+
+### 3.6.3 Create DRBDD configuration file on all three nodes
+
+**Make file**
+    
     touch /etc/drbd.d/r0.res
+
+**Now add these lines in the just created file:**
 
     resource r0 {
         net {
@@ -347,58 +421,106 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
         }
     }
 
+**Note: make sure the node names corresponds with the hostname, which u can find with uname -n**
 
-Doublecheck that the 2nd line corresponds with uname -n!
+### 3.6.4 Preparing The DRBD Devices
 
-**Create DRBD meta datablock**
+**Now that the configuration is in place, create the metadata on alpha and bravo**
 
-    drbdadm create-md r0
+    livenode5# drbdadm create-md r0
 
-    initializing activity log
-    NOT initializing bitmap
     Writing meta data...
+    initializing activity log
+    NOT initialized bitmap
     New drbd meta data block successfully created.
 
-To enable a stacked resource, you first enable its lower-level resource and promote it:
+livenode6# drbdadm create-md data-lower
 
-    drbdadm up r0
+    Writing meta data...
+    initialising activity log
+    NOT initialized bitmap
+    New drbd meta data block successfully created.
 
-**IGNORE FOLLOWING ERROR**
+**Now start DRBD on alpha and bravo**
 
-    /etc/drbd.d/r0.res:1: in resource r0:
-        Missing section 'on <PEER> { ... }'.
-    Device '0' is configured!
-    Command 'drbdmeta 0 v08 /dev/mapper/DRBDVG-DRBDLV1 internal apply-al' terminated with exit code 20
+    livenode5# service drbd start
 
-**Promote (set primary):**
+    livenode6# service drbd start
 
-    drbdadm primary --force r0
-
-**Create DRBD meta data on the stacked resources**
-
-    drbdadm create-md --stacked r0-U
-
-**Then, you may enable the stacked resource:**
-
-    drbdadm up --stacked r0-U 
-    drbdadm primary --force --stacked r0-U
-
-**Check that the DRBD is working**
+**Verify that the lower level DRBD devices are connected**
 
     cat /proc/drbd
-    version: 8.4.5 (api:1/proto:86-101)
-    srcversion: 82483CBF1A7AFF700CBEEC5
-    0: cs:StandAlone ro:Primary/Unknown ds:UpToDate/DUnknown   r----s
-    ns:0 nr:0 dw:40 dr:1592 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:1048508
 
-**Set filter in /etc/lvm/lvm.conf**
+    version: 8.3.0 (api:88/proto:86-89)
+    GIT-hash: 9ba8b93e24d842f0dd3fb1f9b90e8348ddb95829 build by root@alpha, 2009-02-05 10:36:11
+    0: cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent C r---
+    ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:b oos:19530844
 
-    filter = [ "r|/dev/mapper/VG1-cachedlv_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|", "r|/dev/drbd0|"]
+**Tell livenode5 to become the primary node**
 
-    /etc/init.d/lvm2 restart
-    vgck
+NOTE: As the command states, this is going to overwrite any data on bravo: Now is a good time to go and grab your favorite drink.
 
-## 3.6 Create VPS thinpool on top of DRBD device
+    livenode5# drbdadm -- --overwrite-data-of-peer primary data-lower
+    livenode5# cat /proc/drbd
+
+    version: 8.3.0 (api:88/proto:86-89)
+    GIT-hash: 9ba8b93e24d842f0dd3fb1f9b90e8348ddb95829 build by root@alpha, 2009-02-05 10:36:11
+    0: cs:SyncSource ro:Primary/Secondary ds:UpToDate/Inconsistent C r---
+    ns:3088464 nr:0 dw:0 dr:3089408 al:0 bm:188 lo:23 pe:6 ua:53 ap:0 ep:1 wo:b oos:16442556
+    [==>.................] sync'ed: 15.9% (16057/19073)M
+    finish: 0:16:30 speed: 16,512 (8,276) K/sec
+
+**After the sync has finished, create the meta-data on r0-U on livenode5, followed by livenode7
+
+NOTE: the resource is r0-U and the --stacked option is on livenode5 only.
+
+    livenode5# drbdadm --stacked create-md r0-U
+
+    Writing meta data...
+    initialising activity log
+    NOT initialized bitmap
+    New drbd meta data block successfully created.
+    success
+
+    livenode7# drbdadm create-md r0-U
+
+    Writing meta data...
+    initialising activity log
+    NOT initialized bitmap
+    New drbd meta data block sucessfully created.
+
+**Bring up the stacked resource, then make alpha the primary of data-upper**
+
+    livenode5# drbdadm --stacked adjust r0-U
+
+    livenode7# drbdadm adjust data-upper
+    livenode7# cat /proc/drbd
+
+    version: 8.3.0 (api:88/proto:86-89)
+    GIT-hash: 9ba8b93e24d842f0dd3fb1f9b90e8348ddb95829 build by root@foxtrot, 2009-02-02 10:28:37
+    1: cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent A r---
+    ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:b oos:19530208
+
+    livenode5# drbdadm --stacked -- --overwrite-data-of-peer primary r0-U
+    
+**Observe working sync on al nodes**
+
+    livenode5# cat /proc/drbd
+    livenode6# cat /proc/drbd
+    livenode7# cat /proc/drbd
+
+    version: 8.3.0 (api:88/proto:86-89)
+    GIT-hash: 9ba8b93e24d842f0dd3fb1f9b90e8348ddb95829 build by root@alpha, 2009-02-05 10:36:11
+    0: cs:Connected ro:Primary/Secondary ds:UpToDate/UpToDate C r---
+    ns:19532532 nr:0 dw:1688 dr:34046020 al:1 bm:1196 lo:156 pe:0 ua:0 ap:156 ep:1 wo:b oos:0
+    1: cs:SyncSource ro:Primary/Secondary ds:UpToDate/Inconsistent A r---
+    ns:14512132 nr:0 dw:0 dr:14512676 al:0 bm:885 lo:156 pe:32 ua:292 ap:0 ep:1 wo:b oos:5018200
+    [=============>......] sync'ed: 74.4% (4900/19072)M
+    finish: 0:07:06 speed: 11,776 (10,992) K/sec
+
+That's it! Now we can use device **/dev/drbd10** as the basis for a VPS thinpool that will host LXC clients.
+
+## 3.7 Create VPS thinpool on top of DRBD device
 
     pvcreate /dev/drbd10
     vgcreate DRBDVG2 /dev/drbd10
@@ -442,15 +564,12 @@ Substract one PE for the pools creation. What have left will be devided. And the
     Do you really want to convert DRBDVG2/VPSthinpool and DRBDVG2/VPSthinpool_meta? [y/n]: y
         Logical volume "lvol0" created
         Converted DRBDVG2/VPSthinpool to thin pool
-        
 
-
-
-## 3.7 Create container(s) in VPSthinpool on DRBDVG2
+## 3.8 Create container(s) in VPSthinpool on DRBDVG2
 
     lxc-create -t download -n my-container -B lvm --vgname DRBDVG2 --thinpool VPSthinPool --fssize=500M
     
-## 3.8 Create a startup script
+## 3.9 Create a startup script
     
 Right after reboot, the DRBVD blockdevice is not yet up and running. With the following three commands we get it back:
 
