@@ -1,6 +1,10 @@
+**update #2 Jan 7th**
+
+And yet another big update! Succesful data replication test on 3node DRBD device, and documented! See chapter 4.3 for details.
+
 **update Jan 7th**
 
-Another big progress. Succesfully set up a 3-node DRBD device! You can find the full detail in the updated documentation of testcase3.
+Another big progress. Succesfully set up a 3-node DRBD device! You can find the full detail in the updated documentation of testcase3 (chapter 3.6)
 
 Next:
 
