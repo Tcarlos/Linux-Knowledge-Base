@@ -33,7 +33,8 @@
             4.2.1.1 Reducing LXC clients
             4.2.1.2 Increasing LXC Clients
         4.2.3 Overprovisioning Thinpools
-      4.3 Other Functions
+      4.3 Testing DRBD data replication
+      4.4 Other Functions
         4.3.1 Configurating LXC clients
         4.3.2 Cloning LXC clients
     5. Usecases
@@ -581,8 +582,6 @@ Followed by starting the LXC client(s):
 
     lxc-start -n my-container
     
-    
-    
 # 4. Testing 
 
 ## 4.1 Testing LVM Snapshot functions
@@ -802,10 +801,66 @@ In this situation resizing of the VPS thinpool is easily done with lvresize or l
 ### 4.2.3 Overprovisioning Thinpools
 
     http://www.tecmint.com/setup-thin-provisioning-volumes-in-lvm/
+    
+## 4.3 Testing DRBD functions
 
-## 4.3 Other Functions
+### 4.3.1 Testing DRBD data replication on a 3 node
 
-### 4.3.1 Configurating LXC clients
+For this test we assume a working 3 node DRBD device. On this DRBD device we will create, on livenode5, a PV and VG. On the VG we will have an LV, on which we will create some data. The purpose of this test is to observe the same data accessible on livenode7. 
+    
+**Make some data on the LV by making an ext4 FS and mounting it on e.g. /mnt and create a file**
+    
+    mkdir /mnt
+    mkfs.ext4 /dev/replicated/test
+    mount /dev/replicated/test /mnt && cd /mnt
+    touch mooo
+
+**Be outside the /mnt directory and unmount again**
+
+    cd ..
+    umount /dev/replicated/test
+
+**Now do this to make the LV available on the other node**
+
+    To make LV available on the other node, issue the following commands on the primary node (livenode5):
+
+    livenode5# vgchange -a n replicated
+    0 logical volume(s) in volume group "replicated" now active
+    livenode5# drbdadm --stacked secondary r0-U
+    
+    Then, issue these commands on the other (still secondary) node:
+    livenode7# drbdadm primary r0-U
+    # vgchange -a y replicated
+    2 logical volume(s) in volume group "replicated" now active
+    The block device /dev/replicated/test will be available on the other (now primary) node (livenode7)
+
+**Mount on livenode7 and observce succesful data replication!**
+
+    livenode7# mkdir /mnt
+    livenode7# mount /dev/replicated/test /mnt && cd /mnt && ls - la
+    drwxr-xr-x  3 root root  1024 Jan  4 16:57 .
+    drwxr-xr-x 24 root root  4096 Nov 13 16:10 ..
+    drwx------  2 root root 12288 Jan  4 16:43 lost+found
+    -rw-r--r--  1 root root     0 Jan  4 16:57 moo
+
+**To switch back to making livenode5 primary again, issue the following commands:**
+
+    livenode7:/# cd ..
+    livenode7:/# umount /dev/replicated/test
+    livenode7:/# vgchange -a n replicated
+    0 logical volume(s) in volume group "replicated" now active
+    livenode7:/#drbdadm secondary r0-U
+
+    
+**Now go to livenode5:**
+
+    livenode5:/# drbdadm --stacked primary r0-U
+    livenode5:/# vgchange -a y replicated
+    lvs
+    
+## 4.4 Other Functions
+
+### 4.4.1 Configurating LXC clients
 
 To access the filesystem of an lxc client:
 
@@ -816,9 +871,8 @@ to enter this filesystem:
     mount /dev/DRBDVG2/lxc1 /mount
     ls -la /mount
 
-### 4.3.2 Cloning LXC clients
+### 4.4.2 Cloning LXC clients
 
-### 4.3.3 Testing DRBD Synchronisation works correctly 
 
 Monitoring
 
