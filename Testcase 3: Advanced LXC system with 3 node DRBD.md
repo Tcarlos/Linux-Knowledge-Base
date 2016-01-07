@@ -16,6 +16,7 @@
           3.6.1 Create internal IPs for the first and second node
           3.6.2 Create IP aliases on the first and second node
           3.6.3 Create DRBDD configuration file on all three nodes
+          3.6.4 Preparing The DRBD Devices
         3.7 Create VPS thinpool on top of DRBD device
         3.8 Create container(s) in VPSthinpool on DRBDVG2
         3.9 Create a startup script
@@ -428,14 +429,12 @@ Restart the VMs, or do
 **Now that the configuration is in place, create the metadata on alpha and bravo**
 
     livenode5# drbdadm create-md r0
-
     Writing meta data...
     initializing activity log
     NOT initialized bitmap
     New drbd meta data block successfully created.
 
-livenode6# drbdadm create-md data-lower
-
+    livenode6# drbdadm create-md data-lower
     Writing meta data...
     initialising activity log
     NOT initialized bitmap
@@ -444,7 +443,6 @@ livenode6# drbdadm create-md data-lower
 **Now start DRBD on alpha and bravo**
 
     livenode5# service drbd start
-
     livenode6# service drbd start
 
 **Verify that the lower level DRBD devices are connected**
@@ -470,7 +468,7 @@ NOTE: As the command states, this is going to overwrite any data on bravo: Now i
     [==>.................] sync'ed: 15.9% (16057/19073)M
     finish: 0:16:30 speed: 16,512 (8,276) K/sec
 
-**After the sync has finished, create the meta-data on r0-U on livenode5, followed by livenode7
+**After the sync has finished, create the meta-data on r0-U on livenode5, followed by livenode7**
 
 NOTE: the resource is r0-U and the --stacked option is on livenode5 only.
 
