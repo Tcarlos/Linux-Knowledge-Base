@@ -243,40 +243,64 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
             Volume group "DRBDVG" successfully created
             
 
-**Create an LV as a backing device for DRBD**
+**Create Thinpool**
 
-    lvcreate -L 10GB -n DRBDLV1 DRBDVG
+        lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
+        lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
+
+        lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
+        WARNING: Converting logical volume DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta to pool's data and metadata volumes.
+    THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
+    Do you really want to convert DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta? [y/n]: y
+    Logical volume "lvol0" created
+    Converted DRBDVG/cachedDRBDthinpool to thin pool.
+    
+**Create Thin Volume**
+
+        lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
 
 **Config DRBD config file**
 
     touch /etc/drbd.d/r0.res
 
     resource r0 {
-     on livenode5 {
-       device /dev/drbd0;
-       disk /dev/mapper/DRBDVG-DRBDLV1;
-       address 127.0.0.1:7789;
-       meta-disk internal;
-        }
-    }
+  net {
+    protocol C;
+  }
 
-    resource r0-U {
-      net {
-        protocol A;
-      }
+  on livenode5 {
+    device    /dev/drbd1;
+    disk      /dev/mapper/DRBDVG-DRBDLV1;
+    address   10.1.1.31:7789;
+    meta-disk internal;
+  }
 
-      stacked-on-top-of r0 {
-        device /dev/drbd10;
-        address 127.0.0.1:7791;
-       }
+  on livenode6 {
+    device    /dev/drbd1;
+    disk      /dev/mapper/DRBDVG-DRBDLV1;
+    address   10.1.1.32:7789;
+    meta-disk internal;
+  }
+}
 
-    on bullshit {
-        device /dev/drbd10;
-        disk /dev/bulldisk;
-        address 127.0.0.1:7794;
-        meta-disk internal;
-        }
-    }
+resource r0-U {
+  net {
+    protocol A;
+  }
+
+  stacked-on-top-of r0 {
+    device     /dev/drbd10;
+    address    192.168.0.120:7788;
+  }
+
+  on livenode7 {
+    device     /dev/drbd10;
+    disk       /dev/mapper/DRBDVG-DRBDLV1;
+    address    192.168.0.113:7788; # Public IP of the backup node
+    meta-disk  internal;
+  }
+}
+
 
 Doublecheck that the 2nd line corresponds with uname -n!
 
