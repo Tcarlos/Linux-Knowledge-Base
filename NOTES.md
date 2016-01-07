@@ -1,3 +1,22 @@
+**update Jan 7th**
+
+Recap:
+
+- Eerst een basis setup werkend gekregen, inclusief een test om te zien dat data van de een ook daadwerkelijk naar de andere node ging. https://drbd.linbit.com/users-guide/s-nested-lvm.html
+- Daarna jouw setup bestudeerd en kwam tot de conclusie dat er nog een node mist. Want de user guide zegt dat je een drbd op een drbd moet hebben. Een node is nog geen drbd device.
+- Got 3 node setup working, using this guide https://www.howtoforge.com/drbd-8.3-third-node-replication-with-debian-etch, using an alias IP and internal IPs.
+- Found a way to test data replication with a basic 2node setup, now need a small tweak for stacked 
+- 
+- Found information to set the resync rate 
+- gg  https://drbd.linbit.com/users-guide/ch-admin.html
+
+next:
+
+
+
+- test data replication with logical volumes on a 3 node setup
+- use the monitoring tools to know when synching occurs.
+
 **update Jan 4th**
 
 Made big progress! I managed to test data replication with nested Logical Volumes on top of the DRBD device!
