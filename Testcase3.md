@@ -264,42 +264,42 @@ And finally, we attach the cachepool to cachedlv, making the caching function op
     touch /etc/drbd.d/r0.res
 
     resource r0 {
-  net {
-    protocol C;
-  }
+        net {
+        protocol C;
+                }
 
-  on livenode5 {
-    device    /dev/drbd1;
-    disk      /dev/mapper/DRBDVG-DRBDLV1;
-    address   10.1.1.31:7789;
-    meta-disk internal;
-  }
+        on livenode5 {
+            device    /dev/drbd1;
+            disk      /dev/mapper/DRBDVG-DRBDLV1;
+            address   10.1.1.31:7789;
+            meta-disk internal;
+        }
 
-  on livenode6 {
-    device    /dev/drbd1;
-    disk      /dev/mapper/DRBDVG-DRBDLV1;
-    address   10.1.1.32:7789;
-    meta-disk internal;
-  }
-}
+        on livenode6 {
+            device    /dev/drbd1;
+            disk      /dev/mapper/DRBDVG-DRBDLV1;
+            address   10.1.1.32:7789;
+            meta-disk internal;
+        }
+    }
 
-resource r0-U {
-  net {
-    protocol A;
-  }
+    resource r0-U {
+        net {
+        protocol A;
+    }
 
-  stacked-on-top-of r0 {
-    device     /dev/drbd10;
-    address    192.168.0.120:7788;
-  }
+        stacked-on-top-of r0 {
+            device     /dev/drbd10;
+            address    192.168.0.120:7788;
+        }
 
-  on livenode7 {
-    device     /dev/drbd10;
-    disk       /dev/mapper/DRBDVG-DRBDLV1;
-    address    192.168.0.113:7788; # Public IP of the backup node
-    meta-disk  internal;
-  }
-}
+        on livenode7 {
+        device     /dev/drbd10;
+        disk       /dev/mapper/DRBDVG-DRBDLV1;
+        address    192.168.0.113:7788; # Public IP of the backup node
+        meta-disk  internal;
+        }
+    }
 
 
 Doublecheck that the 2nd line corresponds with uname -n!
