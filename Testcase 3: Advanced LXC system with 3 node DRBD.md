@@ -1,4 +1,4 @@
-# TESTCASE 3: Create an advanced system with LXC clients
+# TESTCASE 3: Create an advanced LXC system with 3-node DRBD
 
 # Table of Contents
 
@@ -34,7 +34,7 @@
     
 # 1. Description
 
-This system with lxc clients have the lxc clients inside a thinpool, on top of a DRBD device, with the whole system cached, has many resize options and have 2 types of snapshots available.
+This system with LXC clients has the LXC clients inside a thinpool, on top of a DRBD device, with the whole system cached, has many resize options and has 2 types of snapshots available.
 
 **ASCII Diagram:**
 
