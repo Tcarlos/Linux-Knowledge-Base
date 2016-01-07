@@ -1,3 +1,12 @@
+**update Jan 7th**
+
+Another big progress. Succesfully set up a 3-node DRBD device! You can find the full detail in the updated documentation of testcase3.
+
+Next:
+
+- find out data replication test on 3 node setup! The test on a basic 2 node setup doesnt work on 3. Expecting a small tweak will do the trick.
+- find out when this 3node setup syncs and howlong. This is required for making snapshots of the DRBD device right before it syncs.
+
 
 **update Jan 4th**
 
