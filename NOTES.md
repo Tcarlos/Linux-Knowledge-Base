@@ -1,3 +1,8 @@
+
+**update #2 Jan 14th**
+
+Succesfully made a working 3node setup at the office. Next is the VPS thinpool and on top of that our eagerly anticipated KVM
+
 **update Jan 14th**
 
 - New assignment recieved: Try to play with KVM in the same manner as LXC.
