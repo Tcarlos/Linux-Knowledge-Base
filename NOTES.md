@@ -1,3 +1,12 @@
+**update Jan 14th**
+
+- New assignment recieved: Try to play with KVM in the same manner as LXC.
+
+2do:
+
+- KVM
+- Sync script derived from cat /proc/drbd output, and/or the drbdadm pause sync command?
+
 **update #2 Jan 7th**
 
 And yet another big update! Succesful data replication test on 3node DRBD device, and documented! See chapter 4.3 for details.
