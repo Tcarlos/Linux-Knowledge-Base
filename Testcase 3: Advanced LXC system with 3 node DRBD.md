@@ -427,7 +427,7 @@ Restart the VMs, or do
 
 ### 3.6.4 Preparing The DRBD Devices
 
-**Now that the configuration is in place, create the metadata on alpha and bravo**
+**Now that the configuration is in place, create the metadata on livenode5 and livenode6**
 
     livenode5# drbdadm create-md r0
     Writing meta data...
@@ -435,13 +435,13 @@ Restart the VMs, or do
     NOT initialized bitmap
     New drbd meta data block successfully created.
 
-    livenode6# drbdadm create-md data-lower
+    livenode6# drbdadm create-md r0
     Writing meta data...
     initialising activity log
     NOT initialized bitmap
     New drbd meta data block successfully created.
 
-**Now start DRBD on alpha and bravo**
+**Now start DRBD on livenode5 and livenode6**
 
     livenode5# service drbd start
     livenode6# service drbd start
