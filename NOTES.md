@@ -5,6 +5,8 @@ Succesfully made a working 3node setup at the office. Next is the VPS thinpool a
 
 The office desktop hosting Virtual box has confirmed vmx flag in /proc/cpuinfo
 
+Putting up the 3node DRBD is a real bitch after reboot. Find out the quick commands to enable it.
+
 **update Jan 14th**
 
 - New assignment recieved: Try to play with KVM in the same manner as LXC.
