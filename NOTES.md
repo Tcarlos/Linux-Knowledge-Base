@@ -1,6 +1,7 @@
 **update Jan 14th**
 
 - New assignment recieved: Try to play with KVM in the same manner as LXC.
+- Move this documentation to office gitlab
 
 2do:
 
