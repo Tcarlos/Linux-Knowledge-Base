@@ -121,8 +121,59 @@ Caching has the advantage of quicker disk access. For optimum results we will cr
         Logical volume VG1/cachedlv is now cached.
 
 
+2.3 Create on top of cachedlv a thinpool
 
-## 2.3 Add eth1 devices
+In this thinpool we use a thin volume as backing device and basis for DRBD
+
+**Set in /etc/lvm/lvm.conf:**
+
+    filter = [ "r|/dev/mapper/dev/mapper/VG1-cachedlv_corig|" ]
+
+    /etc/init.d/lvm2 restart
+    vgck
+
+**Create PV on cachedLV:**
+
+    pvcreate /dev/VG1/cachedlv
+    Physical volume "/dev/VG1/cachedlv" successfully created
+
+**Create VG on top of that:**
+
+    vgcreate DRBDVG /dev/VG1/cachedlv
+      Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+      Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+      Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+      Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/VG1/cachedLV not /dev/mapper/VG1-cachedLV_corig
+      Found duplicate PV 7u94b0iYNkobo6RZ4534NN9hb9MOhoyl: using /dev/mapper/VG1-cachedLV_corig not /dev/VG1/cachedLV
+      Physical volume "/dev/VG1/cachedlv" successfully created
+        Volume group "DRBDVG" successfully created
+
+**Create Thinpool:**
+
+    lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
+    lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
+
+    lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
+    WARNING: Converting logical volume DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta to pool's data and metadata volumes.
+THIS WILL DESTROY CONTENT OF LOGICAL VOLUME (filesystem etc.)
+Do you really want to convert DRBDVG/cachedDRBDthinpool and DRBDVG/cachedDRBD_thin_meta? [y/n]: y
+Logical volume "lvol0" created
+Converted DRBDVG/cachedDRBDthinpool to thin pool.
+
+**Create Thin Volume:**
+
+    lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
+
+**Set filters in /etc/lvm/lvm.conf**
+
+    filter = [ "r|/dev/mapper/VG1-cachedlv_corig|", "r|/dev/mapper/DRBDVG-DRBDLV1|", 
+    /etc/init.d/lvm2 restart
+    vgck
+
+
+
+
+## 2.4 Add eth1 devices
   
 Next, we will make eth1 devices for **livenode1** and **livenode2**. These will be used for the 3node DRBD device.
   
