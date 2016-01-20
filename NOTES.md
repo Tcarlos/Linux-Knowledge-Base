@@ -1,18 +1,32 @@
-If 5 goes down, after reboot 5 and 6 are connected again. But the connection between 5 and 7 is lost. In order to solve this:
+- If 6 goes down, it auto connects
+- If 7 goes down it auto connects
+- If 5 goes down, the connection is broken, in order to fix:
 
-- damage r0.res file
-- remove backing device on 7 (lvremove DRBDLV1 DRBDVG)
-- recreate backing device
-- restore r0.res file
 
-and then:
+        
+        livenode5# drbdadm --stacked down r0-U
+        livenode7# drbdadm down r0-U
+        
+make the r0 file unusable, by modifying the first line to:
 
+        #resource r0 {
+        
+Next:
+        
+        livenode7# lvremove DRBDLV1 DRBDVG
+        livenode7# lvcreate -n cachedDRBDthinpool -l 1254 DRBDVG
+        livenode7# lvcreate -n cachedDRBD_thin_meta -l 125 DRBDVG
+        livenode7# lvconvert --type thin-pool --poolmetadata DRBDVG/cachedDRBD_thin_meta DRBDVG/cachedDRBDthinpool
+        livenode7# lvcreate -n DRBDLV1 -V 1g --thinpool DRBDVG/cachedDRBDthinpool
+        
+
+        
         livenode5# drbdadm --stacked create-md r0-U
         livenode7# drbdadm create-md r0-U
         livenode5# drbdadm --stacked adjust r0-U
         livenode7# drbdadm adjust r0-U
         livenode7# cat /proc/drbd
-        drbdadm --stacked -- --overwrite-data-of-peer primary r0-U
+        livenode5# drbdadm --stacked -- --overwrite-data-of-peer primary r0-U
 
 
 
