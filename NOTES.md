@@ -1,3 +1,9 @@
+KVM links:
+
+https://help.ubuntu.com/community/KVM
+http://www.linux-kvm.org/page/HOWTO
+
+
 - If 6 goes down, it auto connects
 - If 7 goes down it auto connects
 - If 5 goes down, the connection is broken, in order to fix:
