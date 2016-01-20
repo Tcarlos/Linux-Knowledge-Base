@@ -1,3 +1,32 @@
+### 1. 
+
+Have yet to figure out the right quick commands to get the drbd device up and running after a reboot.
+
+### 2 
+
+Sequence to put drbd device down:
+
+- 6: drbdadm down r0
+- 7: drbdadm down r0-u
+- 5: drbdadm down r0
+
+### 3 
+
+to reinitiliaze do:
+remove underlying backing device first.
+
+        lvremove DRBDLV1 DRBDVG
+
+then redo the procedure
+
+### 4
+
+- if 5 or 6 makes a long wait with service drbd start, try to run service drbd start at both. It appears they are waiting for each other. 
+- if service drbd status doesnt show started drbd, do service drbd start on both 5 and 6
+- if cat /proc/drbd doesnt show connected, do drbdadm up r0 on both 5 and 6
+- if for some reason you get broken pipe errors of ssh, make a new connection straight to the livenode (so not via another one)
+
+
 
 **update #2 Jan 14th**
 
