@@ -1,3 +1,22 @@
+If 5 goes down, after reboot 5 and 6 are connected again. But the connection between 5 and 7 is lost. In order to solve this:
+
+- damage r0.res file
+- remove backing device on 7 (lvremove DRBDLV1 DRBDVG)
+- recreate backing device
+- restore r0.res file
+
+and then:
+
+        livenode5# drbdadm --stacked create-md r0-U
+        livenode7# drbdadm create-md r0-U
+        livenode5# drbdadm --stacked adjust r0-U
+        livenode7# drbdadm adjust r0-U
+        livenode7# cat /proc/drbd
+        drbdadm --stacked -- --overwrite-data-of-peer primary r0-U
+
+
+
+
 ### 1. 
 
 Have yet to figure out the right quick commands to get the drbd device up and running after a reboot.
